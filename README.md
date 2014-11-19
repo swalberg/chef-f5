@@ -1,10 +1,10 @@
 # f5-cookbook
 
-TODO: Enter the cookbook description here.
+A LWRP to manage F5 VIPs and Pools. Currently a WIP. The documentation below may only refer to wishful thinking.
 
 ## Supported Platforms
 
-TODO: List your supported platforms.
+TBA
 
 ## Attributes
 
@@ -27,6 +27,8 @@ TODO: List your supported platforms.
 
 ### f5::default
 
+Not sure I'll use this.
+
 Include `f5` in your node's `run_list`:
 
 ```json
@@ -37,6 +39,31 @@ Include `f5` in your node's `run_list`:
 }
 ```
 
+### LWRP
+
+In an application's recipe,
+
+```Ruby
+f5_pool 'mypool' do
+  host 'value'
+  port 'value'
+  lb_method 'method' # LB_METHOD_ROUND_ROBIN default
+end
+
+f5_vip 'myvip' do
+  address 'vipaddress'
+  port 'vipport'
+  protocol 'protocol' # TCP default
+  pool 'mypool'
+end
+```
+
+See the documentation for [LocalLB::LBMethod](https://devcentral.f5.com/wiki/iControl.LocalLB__LBMethod.ashx) and [protocol](https://devcentral.f5.com/wiki/iControl.Common__ProtocolType.ashx).
+
+## Testing
+
+Run `bundle exec rspec` to run the chefspec tests.
+
 ## License and Authors
 
-Author:: YOUR_NAME (<YOUR_EMAIL>)
+Author:: Sean Walberg (<sean@ertw.com>)
