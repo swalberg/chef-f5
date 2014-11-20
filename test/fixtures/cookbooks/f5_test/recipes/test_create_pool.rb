@@ -1,2 +1,4 @@
-f5_pool "mypool" do
+f5_pool "reallybasic" do
+  host 'host1'
+  port 80
 end
