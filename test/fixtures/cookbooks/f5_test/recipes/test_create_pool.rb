@@ -1,4 +1,4 @@
 f5_pool "reallybasic" do
-  host 'host1'
+  host node.ipaddress
   port 80
 end
