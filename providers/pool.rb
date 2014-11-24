@@ -1,27 +1,48 @@
+use_inline_resources if defined?(use_inline_resources)
+
 
 def whyrun_supported?
   true
 end
 
 action :create do
+  package "patch"
+
   chef_gem 'f5-icontrol'
 
-  if pool_does_not_exist?
+  if pool_is_missing?
     converge_by("Create pool #{pool}") do
       create_pool
+      new_resource.updated_by_last_action(true)
       Chef::Log.info("#{new_resource} created pool #{pool}")
+    end
+  end
+
+  if node_is_missing?
+    converge_by("Add node #{new_resource.host}") do
+      add_node
+      new_resource.updated_by_last_action(true)
+      Chef::Log.info("#{new_resource} added #{new_resource.host} as a new node")
     end
   end
 
   if pool_is_missing_node?
     converge_by("Add #{new_resource.host} to pool #{pool}") do
-      add_host_to_pool
+      add_node_to_pool
+      new_resource.updated_by_last_action(true)
       Chef::Log.info("#{new_resource} added #{new_resource.host} to pool #{pool}")
     end
   end
 end
 
-def pool_does_not_exist?
+def node_is_missing?
+  response = api.LocalLB.NodeAddressV2.get_list
+
+  response[:item].grep(/#{host}/).empty?
+
+end
+
+def pool_is_missing?
   response = api.LocalLB.Pool.get_list
 
   response[:item].grep(/#{pool}/).empty?
@@ -31,15 +52,19 @@ def pool_is_missing_node?
   response = api.LocalLB.Pool.get_member_v2(pool_names: { item: [ pool ] } )
 
   members = response[:item][:item]
+  return true if members.nil?
+
   members = [ members ] if members.is_a? Hash
-  Chef::Log.info(members)
-  Chef::Log.info("looking for #{host}")
 
-  a = members.map { |m| m[:address] }.grep(/#{host}/)
+  members.map { |m| m[:address] }.grep(/#{host}/).empty?
+end
 
-  Chef::Log.info(a)
-
-  a.empty?
+def add_node
+  api.LocalLB.NodeAddressV2.create(
+    nodes: { item: [ host ] },
+    addresses: { item: [ new_resource.ip ] } ,
+    limits: { item: [0] } )
+  
 end
 
 def create_pool
@@ -48,10 +73,10 @@ def create_pool
                              members: { item: [] }  )
 end
 
-def add_host_to_pool
-  api.LocalLB.Pool.add_member(pool_names: { item: [ pool ]},
-                              members: { item:
-                                         { item: [ { address: new_resource.host , port: new_resource.port } ] } 
+def add_node_to_pool
+  api.LocalLB.Pool.add_member_v2(pool_names: { item: [ pool ]},
+                                 members: { item:
+                                            { item: [ { address: host, port: new_resource.port } ] } 
   })
 end
 

@@ -1,4 +1,5 @@
 f5_pool "reallybasic" do
-  host node.ipaddress
+  ip   node.ipaddress
+  host node.fqdn
   port 80
 end
