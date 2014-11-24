@@ -22,7 +22,7 @@ action :create do
 
   if f5.node_is_missing?(new_resource.host)
     converge_by("Add node #{new_resource.host}") do
-      f5.add_node(new_resource.host)
+      f5.add_node(new_resource.host, new_resource.ip)
       new_resource.updated_by_last_action(true)
       Chef::Log.info("#{new_resource} added #{new_resource.host} as a new node")
     end

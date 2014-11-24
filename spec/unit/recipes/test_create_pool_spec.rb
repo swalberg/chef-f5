@@ -33,9 +33,6 @@ describe 'f5_test::test_create_pool' do
         expect(api).to receive_message_chain("LocalLB", "Pool", "create_v2") { true }
         chef_run
       end
-
-      it 'adds the host to the pool' do
-      end
     end
 
     context 'the pool already exists' do
@@ -53,22 +50,46 @@ describe 'f5_test::test_create_pool' do
         chef_run
       end
 
-      it 'adds the host to the pool' do
+      context 'the pool exists but is different' do
       end
-
-      context "managing a member" do
-
-        context "the member already exists" do
-        end
-
-        context "the member does not exist" do
-        end
-
-      end
-    end
-
-    context 'the pool exists but is different' do
     end
   end
+
+  context 'managing nodes' do
+    let (:node) { double }
+
+    before do
+      allow_any_instance_of(ChefF5).to receive(:pool_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_node?).and_return(false)
+      allow(api).to receive_message_chain("LocalLB.NodeAddressV2") { node }
+    end
+
+    context 'the node exists' do
+      before do
+        expect(node).to receive(:get_list) {
+          {:item=>["/Common/chefspec.local", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
+        }
+      end
+
+      it 'does not add the node' do
+        expect(node).to_not receive(:create)
+        chef_run
+      end
+    end
+
+    context 'the node does not exist' do
+      before do
+        expect(node).to receive(:get_list) {
+          {:item=>["/Common/a", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
+        }
+      end
+
+      it 'does not add the node' do
+        expect(node).to receive(:create)
+        chef_run
+      end
+    end
+  end
+
 end
 
