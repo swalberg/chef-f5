@@ -1,5 +1,7 @@
 require 'spec_helper'
 require 'f5/icontrol'
+require_relative '../../../libraries/chef_f5'
+require_relative '../../../libraries/credentials'
 
 describe 'f5_test::test_create_pool' do
 
@@ -11,12 +13,13 @@ describe 'f5_test::test_create_pool' do
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
+    allow_any_instance_of(Chef::RunContext::CookbookCompiler).to receive(:compile_libraries).and_return(true)
   end
 
   context 'managing the pool' do
     before do
-
-      allow_any_instance_of(Object).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5).to receive(:node_is_missing?).and_return(false)
     end
 
     context 'the pool does not exist' do
