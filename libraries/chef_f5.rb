@@ -6,11 +6,26 @@ class ChefF5
   def node_is_missing?(name)
     response = api.LocalLB.NodeAddressV2.get_list
 
+    return true if response[:item].nil?
+
     response[:item].grep(/#{with_partition name}/).empty?
+  end
+
+  def vip_is_missing?(name)
+    response = api.LocalLB.VirtualServer.get_list
+
+    vips = response[:item]
+    return true if vips.nil?
+
+    vips = Array(vips)
+
+    vips.grep(/#{with_partition name}/).empty?
   end
 
   def pool_is_missing?(name)
     response = api.LocalLB.Pool.get_list
+
+    return true if response[:item].nil?
 
     response[:item].grep(/#{with_partition name}/).empty?
   end
@@ -24,6 +39,14 @@ class ChefF5
     members = [ members ] if members.is_a? Hash
 
     members.map { |m| m[:address] }.grep(/#{with_partition node}/).empty?
+  end
+
+  def vip_default_pool(name)
+    response = api.LocalLB.VirtualServer.get_default_pool_name(
+      virtual_servers: { item: name }
+    )
+
+    response[:item]
   end
 
   def add_node(name, ip)
@@ -40,11 +63,45 @@ class ChefF5
                                members: { item: [] }  )
   end
 
+  def create_vip(name, pool, address, port, protocol = "PROTOCOL_TCP", wildcard = "255.255.255.255")
+    api.LocalLB.VirtualServer.create(definitions: {
+                                       item: {
+                                         name: with_partition(name),
+                                         address: address,
+                                         port: port,
+                                         protocol: "PROTOCOL_TCP" } 
+                                     },
+                                     wildmasks: { item: wildcard},
+                                     resources: {
+                                       item: {
+                                         type: "RESOURCE_TYPE_REJECT",
+                                         default_pool_name: '' 
+                                       }
+                                     },
+                                     profiles: {
+                                       item: [
+                                         item: {
+                                           profile_context: "PROFILE_CONTEXT_TYPE_ALL",
+                                           profile_name: "http" } ] } )
+
+    api.LocalLB.VirtualServer.set_type(
+      virtual_servers: { item: name },
+      types: { item: "RESOURCE_TYPE_POOL" }
+    )
+  end
+
   def add_node_to_pool(pool, node, port)
     api.LocalLB.Pool.add_member_v2(
       pool_names: { item: [ with_partition(pool) ]},
       members: { item: { item: [ { address: with_partition(node), port: port } ] } 
     })
+  end
+
+  def set_vip_pool(vip, pool)
+    api.LocalLB.VirtualServer.set_default_pool_name(
+      virtual_servers: { item: [ with_partition(vip) ]},
+      default_pools: { item: [ with_partition(pool) ]}
+    )
   end
 
   private
