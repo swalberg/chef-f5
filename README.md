@@ -33,6 +33,21 @@ Include `f5` in your node's `run_list`:
 }
 ```
 
+Or if you are using a wrapper cookbook,
+
+```
+include_recipe "f5::default"
+```
+
+Your node will also need access to the credentials for the load balancer in the attributes:
+
+```
+default[:f5][:credentials][:default] = {
+  host: "lb1.example.com",
+  username: "chef-api",
+  password: "TopSecret"
+}
+```
 ### LWRP
 
 In an application's recipe:

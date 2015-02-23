@@ -28,7 +28,7 @@ action :create do
   end
 
   if f5.pool_is_missing_node?(new_resource.name, new_resource.host)
-    converge_by("Add #{new_resource.host} to pool #{pool}") do
+    converge_by("Add #{new_resource.host} to pool #{new_resource.name}") do
       f5.add_node_to_pool(new_resource.name, new_resource.host, new_resource.port)
       new_resource.updated_by_last_action(true)
       Chef::Log.info("#{new_resource} added #{new_resource.host} to pool #{new_resource.name}")
