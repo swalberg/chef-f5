@@ -39,8 +39,19 @@ Or if you are using a wrapper cookbook,
 include_recipe "f5::default"
 ```
 
-Your node will also need access to the credentials for the load balancer in the attributes:
+Your node will also need access to the credentials for the load balancer either in the attributes or a data bag:
 
+If you're using a data bag, call it `f5` and the default item is called `default`.
+```
+$ knife data bag show f5 default
+Unencrypted data bag detected, ignoring any provided secret options.
+host:     lb1.example.com
+id:       default
+password: TopSecret
+username: chef-api
+```
+
+Or, if no data bag is found, attributes are used
 ```
 default[:f5][:credentials][:default] = {
   host: "lb1.example.com",

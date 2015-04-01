@@ -1,3 +1,7 @@
+# 0.2.1
+
+Supporting credentials in a databag
+
 # 0.2.0
 
 Still rough around the edges and nowhere near feature complete, but
