@@ -1,5 +1,7 @@
 class Chef
   class Credentials
+    include Chef::DSL::DataQuery
+
     def initialize(node)
       @node = node
     end
@@ -16,7 +18,9 @@ class Chef
 
     def from_databag(databag_name = 'default')
       begin
-        search(:f5, "id:#{databag_name}").first
+        bag = data_bag_item(:f5, databag_name)
+        bag.default_proc = proc{|h, k| h.key?(k.to_s) ? h[k.to_s] : nil} if bag
+        bag
       rescue Net::HTTPServerException
         nil
       end
