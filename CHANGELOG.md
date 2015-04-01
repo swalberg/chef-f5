@@ -1,3 +1,6 @@
+# 0.2.2
+Bugfix for the last version
+
 # 0.2.1
 
 Supporting credentials in a databag
