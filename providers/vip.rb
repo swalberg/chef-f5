@@ -6,6 +6,7 @@ end
 
 action :create do
   package "patch"
+  package "libxml2-devel"
 
   chef_gem 'f5-icontrol'
 
