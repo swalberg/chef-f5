@@ -5,8 +5,13 @@ def whyrun_supported?
 end
 
 action :create do
-  package "patch"
-  package "libxml2-devel"
+  run_context.include_recipe 'build-essential::default'
+
+  %w(patch libxml2-devel).each do |dep|
+    package dep do
+      action :nothing
+    end.run_action(:install)
+  end
 
   chef_gem 'f5-icontrol'
 
