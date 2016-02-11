@@ -70,8 +70,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # to skip installing and copying to Vagrant's shelf.
   # config.berkshelf.except = []
 
-  config.vm.provision :chef_solo do |chef|
+  config.vm.provision :chef_zero do |chef|
     chef.log_level = :debug
+    chef.nodes_path = 'test/data_bags'
     chef.json = {
       f5: {
         credentials: {
@@ -85,8 +86,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     }
 
     chef.run_list = [
+      'recipe[build-essential::default]',
       'recipe[f5::default]',
-      'recipe[f5_test::test_create_vip]'
+      'recipe[f5_test::test_create_pool]'
     ]
   end
 end

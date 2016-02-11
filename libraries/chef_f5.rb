@@ -27,7 +27,10 @@ class ChefF5
 
     return true if response[:item].nil?
 
-    response[:item].grep(/#{with_partition name}/).empty?
+    pools = response[:item]
+    pools = [ pools ] unless pools.is_a?(Array)
+
+    pools.grep(/#{with_partition name}/).empty?
   end
 
   def pool_is_missing_node?(pool, node)
@@ -39,6 +42,37 @@ class ChefF5
     members = [ members ] if members.is_a? Hash
 
     members.map { |m| m[:address] }.grep(/#{with_partition node}/).empty?
+  end
+
+  def pool_is_missing_monitor?(pool, monitor)
+    monitors = api.LocalLB.Pool.get_monitor_association(pool_names:
+      {item: with_partition(pool)}
+    )[:item]
+
+    monitors = [ monitors ] if monitors.is_a? Hash
+    monitors.select do |mon|
+      mon[:monitor_rule][:monitor_templates][:item] == with_partition(monitor)
+    end.empty?
+  end
+
+  # @param monitor  String|String[]  name(s) of monitors
+  def add_monitor(pool, monitor)
+    api.LocalLB.Pool.set_monitor_association(monitor_associations: {
+      item: [
+        {pool_name: pool,
+         monitor_rule: {
+           monitor_templates: {
+             item: monitor
+           },
+           quorum: '0',
+           # this value is overridden if an array of monitors
+           # are passed in. Instead it is set to
+           # `MONITOR_RULE_TYPE_AND_LIST`
+           type: 'MONITOR_RULE_TYPE_SINGLE'
+         }
+        }
+      ]
+    })
   end
 
   def vip_default_pool(name)

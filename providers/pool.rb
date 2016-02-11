@@ -12,7 +12,6 @@ action :create do
       action :nothing
     end.run_action(:install)
   end
-
   chef_gem 'f5-icontrol'
 
   f5 = ChefF5.new(node)
@@ -38,6 +37,24 @@ action :create do
       f5.add_node_to_pool(new_resource.name, new_resource.host, new_resource.port)
       new_resource.updated_by_last_action(true)
       Chef::Log.info("#{new_resource} added #{new_resource.host} to pool #{new_resource.name}")
+    end
+  end
+
+  if new_resource.monitor
+    if f5.pool_is_missing_monitor?(new_resource.name, new_resource.monitor)
+      converge_by("Add monitor #{new_resource.monitor} to pool #{new_resource.name}") do
+        begin
+          f5.add_monitor(new_resource.name, new_resource.monitor)
+          new_resource.updated_by_last_action(true)
+          Chef::Log.info("#{new_resource} added monitor #{new_resource.monitor} to pool #{new_resource.name}")
+        rescue StandardError => e
+          Chef::Log.info("Adding monitor #{new_resource.monitor} failed. Ensure it exists.")
+          Chef::Log.info(e.inspect)
+        end
+
+      end
+    else
+      Chef::Log.info("#{new_resource.name} already has monitor #{new_resource.monitor}")
     end
   end
 end
