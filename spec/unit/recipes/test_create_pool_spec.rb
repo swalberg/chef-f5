@@ -7,14 +7,12 @@ describe 'f5_test::test_create_pool' do
 
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) { ChefSpec::SoloRunner.new(step_into: ['f5_pool']) do |node|
-    node.set[:f5][:credentials][:default] = { host: '1.2.3.4', username: 'api', password: 'testing' }
-  end.converge(described_recipe) }
+  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) }
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
     allow_any_instance_of(Chef::RunContext::CookbookCompiler).to receive(:compile_libraries).and_return(true)
-    stub_data_bag_item("f5", :default).and_return(nil)
+    stub_data_bag_item("f5", "default").and_return({ host: '1.2.3.4', username: 'api', password: 'testing' })
   end
 
   context 'managing the pool' do
@@ -70,7 +68,7 @@ describe 'f5_test::test_create_pool' do
     context 'the node exists' do
       before do
         expect(node).to receive(:get_list) {
-          {:item=>["/Common/chefspec.local", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
+          {:item=>["/Common/fauxhai.local", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
         }
       end
 
@@ -104,7 +102,7 @@ describe 'f5_test::test_create_pool' do
       allow(api).to receive_message_chain("LocalLB.Pool") { pool }
       allow(api).to receive_message_chain("LocalLB.NodeAddressV2") { node }
       expect(node).to receive(:get_list) {
-        {:item=>["/Common/chefspec.local", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
+        {:item=>["/Common/fauxhai.local", "/Common/two"], :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[2]"}
       }
       allow(pool).to receive(:get_monitor_association) {
         {:item=>{:pool_name=>"/Common/reallybasic", :monitor_rule=>{:type=>"MONITOR_RULE_TYPE_SINGLE", :quorum=>"0", :monitor_templates=>{:item=>"/Common/test-monitor", :"@s:type"=>"A:Array", :"@a:array_type"=>"y:string[1]"}, :"@s:type"=>"iControl:LocalLB.MonitorRule"}}, :"@s:type"=>"A:Array", :"@a:array_type"=>"iControl:LocalLB.Pool.MonitorAssociation[1]"}

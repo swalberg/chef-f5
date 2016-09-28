@@ -1,13 +1,13 @@
 class ChefF5
-  def initialize(node)
+  def initialize(node, load_balancer)
     @node = node
+    @load_balancer = load_balancer
   end
 
   def node_is_missing?(name)
     response = api.LocalLB.NodeAddressV2.get_list
 
     return true if response[:item].nil?
-
     response[:item].grep(/#{with_partition name}/).empty?
   end
 
@@ -153,15 +153,13 @@ class ChefF5
     require 'f5/icontrol'
 
     @api ||= begin
-               credentials = Chef::Credentials.new(@node).credentials_for(:default)
+               credentials = Chef::Credentials.new(@node).credentials_for(@load_balancer)
 
-               F5::Icontrol.configure do |f|
-                 f.host = credentials[:host]
-                 f.username = credentials[:username]
-                 f.password = credentials[:password]
-               end
-
-               api = F5::Icontrol::API.new
+               api = F5::Icontrol::API.new(
+                 host: credentials[:host],
+                 username: credentials[:username],
+                 password: credentials[:password]
+               )
              end
   end
 

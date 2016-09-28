@@ -5,16 +5,17 @@ def whyrun_supported?
 end
 
 action :create do
-  run_context.include_recipe 'build-essential::default'
-
   %w(patch libxml2-devel).each do |dep|
     package dep do
       action :nothing
     end.run_action(:install)
   end
-  chef_gem 'f5-icontrol'
 
-  f5 = ChefF5.new(node)
+  chef_gem 'f5-icontrol' do
+    compile_time false
+  end
+
+  f5 = ChefF5.new(node, new_resource.load_balancer)
 
   if f5.pool_is_missing?(new_resource.name)
     converge_by("Create pool #{new_resource.name}") do
