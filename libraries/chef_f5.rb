@@ -156,6 +156,7 @@ class ChefF5
                credentials = Chef::Credentials.new(@node).credentials_for(@load_balancer)
 
                api = F5::Icontrol::API.new(
+                 nil,
                  host: credentials[:host],
                  username: credentials[:username],
                  password: credentials[:password]
