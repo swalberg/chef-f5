@@ -20,4 +20,4 @@ bin/*
 .kitchen.local.yml
 .idea
 helper.rb
-test/data_bags
+test/integration/data_bags/

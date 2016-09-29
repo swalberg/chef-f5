@@ -6,10 +6,4 @@ provisioner:
   name: chef_solo
 
 platforms:
-  - name: ubuntu-12.04
-  - name: centos-6.4
-
-suites:
-  - name: default
-    run_list:
-    attributes:
+  - name: centos-6.7

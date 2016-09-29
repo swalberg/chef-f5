@@ -12,7 +12,9 @@ action :create do
   end
 
   chef_gem 'f5-icontrol' do
-    compile_time false
+    action :install
+    compile_time true
+    version node['f5']['gem_version']
   end
 
   f5 = ChefF5.new(node, new_resource.load_balancer)

@@ -11,5 +11,6 @@ gem 'test-kitchen'
 gem 'kitchen-vagrant'
 gem 'chefspec'
 gem 'foodcritic'
+gem 'vagrant-wrapper'
 
 gem 'f5-icontrol'
