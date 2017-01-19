@@ -102,7 +102,7 @@ class ChefF5
                                        item: {
                                          name: with_partition(name),
                                          address: address,
-                                         port: port,
+                                         port: port.to_s,
                                          protocol: "PROTOCOL_TCP" } 
                                      },
                                      wildmasks: { item: wildcard},
@@ -127,7 +127,7 @@ class ChefF5
   def add_node_to_pool(pool, node, port)
     api.LocalLB.Pool.add_member_v2(
       pool_names: { item: [ with_partition(pool) ]},
-      members: { item: { item: [ { address: with_partition(node), port: port } ] } 
+      members: { item: { item: [ { address: with_partition(node), port: port.to_s } ] } 
     })
   end
 
