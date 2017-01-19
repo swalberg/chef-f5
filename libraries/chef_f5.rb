@@ -8,7 +8,7 @@ class ChefF5
     response = api.LocalLB.NodeAddressV2.get_list
 
     return true if response[:item].nil?
-    response[:item].grep(/#{with_partition name}/).empty?
+    Array(response[:item]).grep(/#{with_partition name}/).empty?
   end
 
   def vip_is_missing?(name)
@@ -28,9 +28,8 @@ class ChefF5
     return true if response[:item].nil?
 
     pools = response[:item]
-    pools = [ pools ] unless pools.is_a?(Array)
 
-    pools.grep(/#{with_partition name}/).empty?
+    Array(pools).grep(/#{with_partition name}/).empty?
   end
 
   def pool_is_missing_node?(pool, node)
