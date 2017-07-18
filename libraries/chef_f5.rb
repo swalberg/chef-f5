@@ -150,7 +150,7 @@ class ChefF5
     require 'f5/icontrol'
 
     @api ||= begin
-               credentials = Chef::Credentials.new(@node).credentials_for(@load_balancer)
+               credentials = ChefF5::Credentials.new(@node).credentials_for(@load_balancer)
 
                api = F5::Icontrol::API.new(
                  nil,

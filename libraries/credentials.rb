@@ -1,4 +1,4 @@
-class Chef
+class ChefF5
   class Credentials
     include Chef::DSL::DataQuery
 
