@@ -16,8 +16,8 @@ class ChefF5
       @node[:f5][:credentials]
     end
 
-    def from_databag(databag_name = 'default')
-      bag = data_bag_item(:f5, databag_name)
+    def from_databag(bag_item_name = 'default')
+      bag = data_bag_item(@node['f5']['databag_name'].to_sym, bag_item_name)
       bag.default_proc = proc { |h, k| h.key?(k.to_s) ? h[k.to_s] : nil } if bag
       bag
     rescue Net::HTTPServerException
