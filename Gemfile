@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 group :development do
-  gem "berkshelf", github: "berkshelf/berkshelf"
+  gem 'berkshelf', github: 'berkshelf/berkshelf'
 end
 
 group :plugins do

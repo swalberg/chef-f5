@@ -6,8 +6,8 @@ class Chef
       @node = node
     end
 
-    def credentials_for(lb = "default")
-      from_databag(lb) || the_hash[lb] || the_hash[:default]
+    def credentials_for(lb = 'default')
+      from_databag(lb) || the_hash[lb] || the_hash[:default] # ~FC001, ~FC010
     end
 
     private
@@ -17,13 +17,11 @@ class Chef
     end
 
     def from_databag(databag_name = 'default')
-      begin
-        bag = data_bag_item(:f5, databag_name)
-        bag.default_proc = proc{|h, k| h.key?(k.to_s) ? h[k.to_s] : nil} if bag
-        bag
-      rescue Net::HTTPServerException
-        nil
-      end
+      bag = data_bag_item(:f5, databag_name)
+      bag.default_proc = proc { |h, k| h.key?(k.to_s) ? h[k.to_s] : nil } if bag
+      bag
+    rescue Net::HTTPServerException
+      nil
     end
   end
 end

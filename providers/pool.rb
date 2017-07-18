@@ -44,7 +44,6 @@ action :create do
           Chef::Log.info("Adding monitor #{new_resource.monitor} failed. Ensure it exists.")
           Chef::Log.info(e.inspect)
         end
-
       end
     else
       Chef::Log.debug("#{new_resource.name} already has monitor #{new_resource.monitor}")
