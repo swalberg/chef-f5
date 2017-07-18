@@ -18,9 +18,7 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 ## Attributes
 
-Key | Type | Description | Default
---- | ---- | ----------- | -------
-    |
+- `node['f5']['gem_version']` - Sets the version of the gem that will be installed via the resource
 
 ## Usage
 
@@ -47,7 +45,7 @@ default[:f5][:credentials][:default] = {
 }
 ```
 
-### LWRP
+### Resources
 
 In an application's recipe:
 
