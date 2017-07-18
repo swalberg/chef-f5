@@ -5,11 +5,9 @@ def whyrun_supported?
 end
 
 action :create do
-  %w(patch libxml2-devel).each do |dep|
-    package dep do
-      action :nothing
-    end.run_action(:install)
-  end
+  package %w(patch libxml2-devel) do
+    action :nothing
+  end.run_action(:install)
 
   chef_gem 'f5-icontrol' do
     action :install
