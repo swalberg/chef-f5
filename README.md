@@ -1,47 +1,33 @@
 # f5-cookbook
 
-A LWRP to manage F5 VIPs and Pools. Currently a WIP, but it will create VIPs and pools, and add nodes to pools
+A set of resources for managing F5 load balancers. Currently a WIP, but it will create VIPs and pools, and add nodes to pools
 
-## Supported Platforms
+## Requirements
 
-TBA
+### Platforms
+
+- All platforms where Chef runs
+
+### Chef
+
+- Chef 12.1+
+
+### Cookbooks
+
+- build-essential
 
 ## Attributes
 
-<table>
-  <tr>
-    <th>Key</th>
-    <th>Type</th>
-    <th>Description</th>
-    <th>Default</th>
-  </tr>
-</table>
+Key | Type | Description | Default
+--- | ---- | ----------- | -------
+    |
 
 ## Usage
-
-### f5::default
-
-Not needed at the moment
-
-Include `f5` in your node's `run_list`:
-
-```json
-{
-  "run_list": [
-    "recipe[f5::default]"
-  ]
-}
-```
-
-Or if you are using a wrapper cookbook,
-
-```
-include_recipe "f5::default"
-```
 
 Your node will also need access to the credentials for the load balancer either in the attributes or a data bag:
 
 If you're using a data bag, call it `f5` and the default item is called `default`.
+
 ```
 $ knife data bag show f5 default
 Unencrypted data bag detected, ignoring any provided secret options.
@@ -52,6 +38,7 @@ username: chef-api
 ```
 
 Or, if no data bag is found, attributes are used
+
 ```
 default[:f5][:credentials][:default] = {
   host: "lb1.example.com",
@@ -59,11 +46,12 @@ default[:f5][:credentials][:default] = {
   password: "TopSecret"
 }
 ```
+
 ### LWRP
 
 In an application's recipe:
 
-```Ruby
+```ruby
 # Creates the pool if missing and adds this node to the pool
 # (currently using node.ipaddress and node.fqdn for the node)
 f5_pool 'mypool' do
@@ -89,4 +77,4 @@ Run `rspec` to run the chefspec tests.
 
 ## License and Authors
 
-Author:: Sean Walberg (<sean@ertw.com>)
+Author:: Sean Walberg ([sean@ertw.com](mailto:sean@ertw.com))
