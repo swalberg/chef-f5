@@ -10,7 +10,7 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 ### Chef
 
-- Chef 12.1+
+- Chef 12.6+
 
 ### Cookbooks
 
