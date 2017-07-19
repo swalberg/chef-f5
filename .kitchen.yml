@@ -6,4 +6,17 @@ provisioner:
   name: chef_solo
 
 platforms:
-  - name: centos-6.7
+  - name: centos-6.9
+
+suites:
+  - name: default
+    run_list:
+      - recipe[f5_test::test_create_vip]
+      - recipe[f5_test::test_create_pool]
+    attributes:
+      f5:
+        credentials:
+          default:
+            username: <%= ENV['F5_USERNAME'] %>
+            password: <%= ENV['F5_PASSWORD'] %>
+            host: <%= ENV['F5_HOST'] %>

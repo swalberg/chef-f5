@@ -1,6 +1,7 @@
 class ChefF5
-  def initialize(node, load_balancer)
+  def initialize(node, resource, load_balancer)
     @node = node
+    @resource = resource
     @load_balancer = load_balancer
   end
 
@@ -150,8 +151,7 @@ class ChefF5
     require 'f5/icontrol'
 
     @api ||= begin
-               credentials = ChefF5::Credentials.new(@node).credentials_for(@load_balancer)
-
+               credentials = ChefF5::Credentials.new(@node, @resource).credentials_for(@load_balancer)
                api = F5::Icontrol::API.new(
                  nil,
                  host: credentials[:host],

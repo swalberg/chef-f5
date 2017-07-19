@@ -9,13 +9,12 @@ action :create do
     action :nothing
   end.run_action(:install)
 
-
   chef_gem 'f5-icontrol' do
     compile_time true
     version node['f5']['gem_version']
   end
 
-  f5 = ChefF5.new(node, new_resource.load_balancer)
+  f5 = ChefF5.new(node, new_resource, new_resource.load_balancer)
 
   if f5.vip_is_missing?(new_resource.name)
     converge_by("Create vip #{new_resource.name}") do
