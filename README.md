@@ -6,7 +6,7 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 ### Platforms
 
-- All platforms where Chef runs
+- RHEL platforms
 
 ### Chef
 
@@ -14,7 +14,7 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 ### Cookbooks
 
-- build-essential
+- none
 
 ## Attributes
 
