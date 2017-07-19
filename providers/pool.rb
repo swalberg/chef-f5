@@ -5,7 +5,7 @@ def whyrun_supported?
 end
 
 action :create do
-  package %w(gcc zlib-devel) do
+  package %w(gcc zlib-devel patch) do
     action :nothing
   end.run_action(:install)
 
