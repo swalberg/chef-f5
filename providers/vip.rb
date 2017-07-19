@@ -5,14 +5,13 @@ def whyrun_supported?
 end
 
 action :create do
-  %w(patch libxml2-devel).each do |dep|
-    package dep do
-      action :nothing
-    end.run_action(:install)
-  end
+  package %w(gcc zlib-devel) do
+    action :nothing
+  end.run_action(:install)
+
 
   chef_gem 'f5-icontrol' do
-    compile_time false
+    compile_time true
     version node['f5']['gem_version']
   end
 

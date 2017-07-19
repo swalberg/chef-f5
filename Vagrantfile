@@ -85,8 +85,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     }
 
     chef.run_list = [
-      'recipe[build-essential::default]',
-      'recipe[f5::default]',
       'recipe[f5_test::test_create_pool]',
     ]
   end
