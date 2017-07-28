@@ -6,7 +6,8 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 ### Platforms
 
-- RHEL platforms
+- RHEL/Fedora and derivatives
+- Debian/Ubuntu and derivatives
 
 ### Chef
 

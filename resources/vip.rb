@@ -8,16 +8,8 @@ property :lb_username, String
 property :lb_password, String
 
 action :create do
-  package %w(gcc zlib-devel patch) do
-    action :nothing
-  end.run_action(:install)
-
-  chef_gem 'f5-icontrol' do
-    compile_time true
-    version node['f5']['gem_version']
-  end
-
-  f5 = ChefF5.new(node, new_resource, new_resource.load_balancer)
+  load_f5_gem
+  f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer)
 
   if f5.vip_is_missing?(new_resource.name)
     converge_by("Create vip #{new_resource.name}") do
@@ -29,4 +21,8 @@ action :create do
   if f5.vip_default_pool(new_resource.name) != new_resource.pool
     f5.set_vip_pool(new_resource.name, new_resource.pool)
   end
+end
+
+action_class do
+  include ChefF5::GemHelper
 end

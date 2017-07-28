@@ -1,4 +1,4 @@
-class ChefF5
+module ChefF5
   class Credentials
     include Chef::DSL::DataQuery
 
@@ -9,9 +9,9 @@ class ChefF5
 
     def credentials_for(lb = 'default')
       creds = from_resource ||
-        from_databag(lb) ||
-        from_attributes(lb) ||
-        from_attributes('default')
+              from_databag(lb) ||
+              from_attributes(lb) ||
+              from_attributes('default')
 
       raise "No credentials found for the load balancer #{lb}. See README.md for usage information" unless creds
       creds
