@@ -2,10 +2,10 @@
 # vi: set ft=ruby :
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
-VAGRANTFILE_API_VERSION = '2'
+VAGRANTFILE_API_VERSION = '2'.freeze
 
-Vagrant.require_plugin "vagrant-berkshelf"
-Vagrant.require_plugin "vagrant-omnibus"
+Vagrant.require_plugin 'vagrant-berkshelf'
+Vagrant.require_plugin 'vagrant-omnibus'
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # All Vagrant configuration is done here. The most common configuration
@@ -17,12 +17,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Set the version of chef to install using the vagrant-omnibus plugin
   config.omnibus.chef_version = :latest
   # Every Vagrant virtual environment requires a box to build off of.
-  config.vm.box = "CentOS-6.4-x86_64-v20130731.box"
+  config.vm.box = 'CentOS-6.4-x86_64-v20130731.box'
 
   # The url from where the 'config.vm.box' box will be fetched if it
   # doesn't already exist on the user's system.
-  config.vm.box_url = "http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130731.box"
-
+  config.vm.box_url = 'http://developer.nrel.gov/downloads/vagrant-boxes/CentOS-6.4-x86_64-v20130731.box'
 
   # Assign this VM to a host-only network IP, allowing you to access it
   # via the IP. Host-only networks can talk to the host machine as well as
@@ -77,18 +76,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       f5: {
         credentials: {
           default: {
-            host: "10.198.4.124",
-            username: "api",
-            password: "testing"
-          }
-        }
-      }
+            host: '10.198.4.124',
+            username: 'api',
+            password: 'testing',
+          },
+        },
+      },
     }
 
     chef.run_list = [
-      'recipe[build-essential::default]',
-      'recipe[f5::default]',
-      'recipe[f5_test::test_create_pool]'
+      'recipe[f5_test::test_create_pool]',
     ]
   end
 end
