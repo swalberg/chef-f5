@@ -31,6 +31,13 @@ action :create do
     end
   end
 
+  current_enabled_status = f5.node_is_enabled?(new_resource.host)
+  if (new_resource.enabled == false && current_enabled_status == true)
+    f5.node_disable!(new_resource.host)
+  elsif (new_resource.enabled == true && current_enabled_status == false)
+    # enable
+  end
+
   if new_resource.monitor
     if f5.pool_is_missing_monitor?(new_resource.name, new_resource.monitor)
       converge_by("Add monitor #{new_resource.monitor} to pool #{new_resource.name}") do

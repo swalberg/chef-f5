@@ -21,6 +21,7 @@ describe 'f5_test::test_create_pool' do
     before do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
     end
 
@@ -63,6 +64,7 @@ describe 'f5_test::test_create_pool' do
     before do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
     end
@@ -101,6 +103,7 @@ describe 'f5_test::test_create_pool' do
     before do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       expect(node).to receive(:get_list) {

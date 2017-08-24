@@ -13,6 +13,16 @@ module ChefF5
       Array(response[:item]).grep(/#{with_partition name}/).empty?
     end
 
+    def node_is_enabled?(name)
+      response = api.LocalLB.NodeAddressV2.get_object_status(name)
+
+      return response[:enabled_status][0] == 1
+    end
+
+    def node_disable!(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [2])
+    end
+
     def vip_is_missing?(name)
       response = api.LocalLB.VirtualServer.get_list
 
