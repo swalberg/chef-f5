@@ -2,11 +2,14 @@ require 'spec_helper'
 require 'f5/icontrol'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
+require_relative '../../../libraries/gem_helper'
 
 describe 'f5_test::test_create_pool' do
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) }
+  let(:chef_run) { 
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) 
+  }
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
@@ -16,9 +19,9 @@ describe 'f5_test::test_create_pool' do
 
   context 'managing the pool' do
     before do
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_node?).and_return(false)
-      allow_any_instance_of(ChefF5).to receive(:node_is_missing?).and_return(false)
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_monitor?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
     end
 
     context 'the pool does not exist' do
@@ -58,9 +61,9 @@ describe 'f5_test::test_create_pool' do
     let (:node) { double }
 
     before do
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing?).and_return(false)
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_node?).and_return(false)
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_monitor?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
     end
 
@@ -96,8 +99,8 @@ describe 'f5_test::test_create_pool' do
     let (:node) { double }
 
     before do
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing?).and_return(false)
-      allow_any_instance_of(ChefF5).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       expect(node).to receive(:get_list) {
@@ -109,7 +112,7 @@ describe 'f5_test::test_create_pool' do
     end
     context 'the monitor is already on assigned to the pool' do
       before do
-        allow_any_instance_of(ChefF5).to receive(:pool_is_missing_monitor?).and_return(false)
+        allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       end
       it 'doesnt add the monitor to the pool' do
         expect(pool).to_not receive(:set_monitor_association)
@@ -119,7 +122,7 @@ describe 'f5_test::test_create_pool' do
 
     context 'the monitor isnt assigned to the pool' do
       before do
-        allow_any_instance_of(ChefF5).to receive(:pool_is_missing_monitor?).and_return(true)
+        allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(true)
       end
       it 'adds the monitor to the pool' do
         expect(pool).to receive(:set_monitor_association)
