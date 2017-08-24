@@ -21,3 +21,6 @@ bin/*
 .idea
 helper.rb
 test/integration/data_bags/
+
+# build output
+metadata.json
