@@ -87,7 +87,7 @@ describe 'f5_test::test_create_pool' do
         }
       end
 
-      it 'does not add the node' do
+      it 'does add the node' do
         expect(node).to receive(:create)
         chef_run
       end
