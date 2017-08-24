@@ -17,7 +17,8 @@ namespace :test do
 
   namespace :run do
     task :unit do
-      exec('bundle exec rake lint && bundle exec rspec -f d --color spec')
+      #exec('bundle exec rake lint && bundle exec rspec -f d --color spec')
+      exec('bundle exec rspec -f d --color spec')
     end
   end
 

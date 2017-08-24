@@ -24,3 +24,4 @@ test/integration/data_bags/
 
 # build output
 metadata.json
+tmp/
