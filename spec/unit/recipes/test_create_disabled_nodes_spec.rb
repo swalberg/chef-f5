@@ -43,12 +43,6 @@ describe 'f5_test::test_create_disabled_nodes' do
     end
 
     context 'the node exists' do
-      before do
-        expect(node).to receive(:get_list) {
-          { :item => ['/Common/fauxhai.local', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
-        }
-      end
-
       context 'and is enabled' do
         before do
           expect(node).to receive(:get_list) {
