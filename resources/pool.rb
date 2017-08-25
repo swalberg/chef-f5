@@ -7,7 +7,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
-property :enabled, [true, false], default: true
+property :enabled, [:manual, :enabled, :disabled], default: :manual
 
 action :create do
   load_f5_gem
@@ -32,9 +32,9 @@ action :create do
   end
 
   current_enabled_status = f5.node_is_enabled?(new_resource.host)
-  if (new_resource.enabled == false && current_enabled_status == true)
+  if (new_resource.enabled == :disabled && current_enabled_status == true)
     f5.node_disable!(new_resource.host)
-  elsif (new_resource.enabled == true && current_enabled_status == false)
+  elsif (new_resource.enabled == :enabled && current_enabled_status == false)
     # enable
   end
 

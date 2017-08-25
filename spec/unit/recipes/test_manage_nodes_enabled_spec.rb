@@ -4,11 +4,11 @@ require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
-describe 'f5_test::test_create_disabled_nodes' do
+describe 'f5_test::test_manage_nodes_enabled' do
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) { 
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) 
+  let(:chef_run) {
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
   }
 
   before do
@@ -17,7 +17,7 @@ describe 'f5_test::test_create_disabled_nodes' do
     stub_data_bag_item('f5', 'default').and_return(host: '1.2.3.4', username: 'api', password: 'testing')
   end
 
-  context 'managing disabled nodes' do
+  context 'managing explicitly enabled nodes' do
     let (:node) { double }
 
     before do
@@ -44,14 +44,13 @@ describe 'f5_test::test_create_disabled_nodes' do
 
       it 'does add the node' do
         expect(node).to receive(:create)
-        expect(node).to receive(:set_session_enabled_state)
         chef_run
       end
 
-      it 'does set the node status to disabled' do
-        expect(node).to receive(:create)
+      it 'does not set the node enabled status' do
+        allow(node).to receive(:create)
         # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__set_session_enabled_state.ashx
-        expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[ChefF5::EnabledStatus::ENABLED_STATUS_DISABLED])
+        expect(node).to_not receive(:set_session_enabled_state)
         chef_run
       end
     end
@@ -73,13 +72,12 @@ describe 'f5_test::test_create_disabled_nodes' do
 
         it 'does not add the node' do
           expect(node).to_not receive(:create)
-          expect(node).to receive(:set_session_enabled_state)
           chef_run
         end
 
-        it 'does set the node status to disabled' do
+        it 'does not set the node enabled status' do
           # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__set_session_enabled_state.ashx
-          expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[ChefF5::EnabledStatus::ENABLED_STATUS_DISABLED])
+          expect(node).to_not receive(:set_session_enabled_state)
           chef_run
         end
       end
@@ -103,8 +101,8 @@ describe 'f5_test::test_create_disabled_nodes' do
           chef_run
         end
 
-        it 'does not set the node status to disabled' do
-          expect(node).to_not receive(:set_session_enabled_state)
+        it 'does set the node enabled status to enabled' do
+          expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[ChefF5::EnabledStatus::ENABLED_STATUS_ENABLED])
           chef_run
         end
       end

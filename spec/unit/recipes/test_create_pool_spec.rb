@@ -7,8 +7,8 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_pool' do
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) { 
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) 
+  let(:chef_run) {
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
   }
 
   before do
@@ -58,7 +58,7 @@ describe 'f5_test::test_create_pool' do
     end
   end
 
-  context 'managing nodes' do
+  context 'managing manually enabled nodes' do
     let (:node) { double }
 
     before do
@@ -80,6 +80,11 @@ describe 'f5_test::test_create_pool' do
         expect(node).to_not receive(:create)
         chef_run
       end
+
+      it 'does not set the node enabled status' do
+        expect(node).to_not receive(:set_session_enabled_state)
+        chef_run
+      end
     end
 
     context 'the node does not exist' do
@@ -91,6 +96,12 @@ describe 'f5_test::test_create_pool' do
 
       it 'does add the node' do
         expect(node).to receive(:create)
+        chef_run
+      end
+
+      it 'does not set the node enabled status' do
+        allow(node).to receive(:create)
+        expect(node).to_not receive(:set_session_enabled_state)
         chef_run
       end
     end
