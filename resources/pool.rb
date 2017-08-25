@@ -7,7 +7,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
-property :enabled_status, [:manual, :enabled, :disabled], default: :manual
+property :enabled_status, [:manual, :enabled, :disabled], default: node['f5']['enabled_status']
 
 action :create do
   load_f5_gem
