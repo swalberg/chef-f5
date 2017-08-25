@@ -99,6 +99,7 @@ describe 'f5_test::test_manage_nodes_enabled' do
 
         it 'does not add the node' do
           expect(node).to_not receive(:create)
+          allow(node).to receive(:set_session_enabled_state)
           chef_run
         end
 

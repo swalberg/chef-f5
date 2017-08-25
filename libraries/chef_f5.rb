@@ -24,6 +24,10 @@ module ChefF5
       api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_DISABLED])
     end
 
+    def node_enable!(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED])
+    end
+
     def vip_is_missing?(name)
       response = api.LocalLB.VirtualServer.get_list
 

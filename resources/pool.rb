@@ -31,11 +31,13 @@ action :create do
     end
   end
 
-  current_enabled_status = f5.node_is_enabled?(new_resource.host)
-  if (new_resource.enabled_status == :disabled && current_enabled_status == true)
-    f5.node_disable!(new_resource.host)
-  elsif (new_resource.enabled_status == :enabled && current_enabled_status == false)
-    # enable
+  if new_resource.enabled_status != :manual
+    current_enabled_status = f5.node_is_enabled?(new_resource.host)
+    if (new_resource.enabled_status == :disabled && current_enabled_status == true)
+      f5.node_disable!(new_resource.host)
+    elsif (new_resource.enabled_status == :enabled && current_enabled_status == false)
+      f5.node_enable!(new_resource.host)
+    end
   end
 
   if new_resource.monitor
