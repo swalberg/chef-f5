@@ -37,7 +37,7 @@ describe 'f5_test::test_create_disabled_nodes' do
         # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__get_object_status.ashx
         allow(api).to receive_message_chain('LocalLB.NodeAddressV2.get_object_status').with('fauxhai.local').and_return({
           availability_status: [],
-          enabled_status: [1],
+          enabled_status: [ChefF5::EnabledStatus::ENABLED_STATUS_ENABLED],
           status_description: ''
         })
       end
@@ -51,7 +51,7 @@ describe 'f5_test::test_create_disabled_nodes' do
       it 'does set the node status to disabled' do
         expect(node).to receive(:create)
         # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__set_session_enabled_state.ashx
-        expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[2])
+        expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[ChefF5::EnabledStatus::ENABLED_STATUS_DISABLED])
         chef_run
       end
     end
@@ -66,7 +66,7 @@ describe 'f5_test::test_create_disabled_nodes' do
           # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__get_object_status.ashx
           allow(api).to receive_message_chain('LocalLB.NodeAddressV2.get_object_status').with('fauxhai.local').and_return({
             availability_status: [],
-            enabled_status: [1],
+            enabled_status: [ChefF5::EnabledStatus::ENABLED_STATUS_ENABLED],
             status_description: ''
           })
         end
@@ -79,7 +79,7 @@ describe 'f5_test::test_create_disabled_nodes' do
 
         it 'does set the node status to disabled' do
           # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__set_session_enabled_state.ashx
-          expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[2])
+          expect(node).to receive(:set_session_enabled_state).with(['fauxhai.local'],[ChefF5::EnabledStatus::ENABLED_STATUS_DISABLED])
           chef_run
         end
       end
@@ -93,7 +93,7 @@ describe 'f5_test::test_create_disabled_nodes' do
           # https://devcentral.f5.com/wiki/iControl.LocalLB__NodeAddressV2__get_object_status.ashx
           allow(api).to receive_message_chain('LocalLB.NodeAddressV2.get_object_status').with('fauxhai.local').and_return({
             availability_status: [],
-            enabled_status: [2],
+            enabled_status: [ChefF5::EnabledStatus::ENABLED_STATUS_DISABLED],
             status_description: ''
           })
         end
