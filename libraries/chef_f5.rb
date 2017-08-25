@@ -1,13 +1,4 @@
 module ChefF5
-  # https://devcentral.f5.com/wiki/iControl.LocalLB__EnabledStatus.ashx
-  # TODO: migrate to the f5-icontrol gem
-  module EnabledStatus
-    ENABLED_STATUS_NONE = 0 # error scenario
-    ENABLED_STATUS_ENABLED = 1
-    ENABLED_STATUS_DISABLED = 2
-    ENABLED_STATUS_DISABLED_BY_PARENT = 3
-  end
-
   class Client
 
     def initialize(node, resource, load_balancer)
@@ -26,11 +17,11 @@ module ChefF5
     def node_is_enabled?(name)
       response = api.LocalLB.NodeAddressV2.get_object_status(name)
 
-      return response[:enabled_status][0] == EnabledStatus::ENABLED_STATUS_ENABLED
+      return response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
     end
 
     def node_disable!(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [EnabledStatus::ENABLED_STATUS_DISABLED])
+      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_DISABLED])
     end
 
     def vip_is_missing?(name)
