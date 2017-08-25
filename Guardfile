@@ -35,10 +35,8 @@ guard :rspec, cmd: 'bundle exec rspec --format documentation' do
   watch(rspec.spec_helper) { rspec.spec_dir }
   watch(rspec.spec_support) { rspec.spec_dir }
   watch(rspec.spec_files)
-  watch(%r{^libraries/(.+)\.rb$}) { |m| "spec/unit/libraries/#{m[1]}_spec.rb" }
-  watch(%r{^libraries/chef_f5.rb$}) { |m| "spec/unit/recipes/test_create_disabled_nodes_spec.rb" }
-  watch(%r{^resources/pool.rb$}) { |m| "spec/unit/recipes/test_create_pool_spec.rb" }
-  watch(%r{^resources/pool.rb$}) { |m| "spec/unit/recipes/test_create_disabled_nodes_spec.rb" }
+  watch(%r{^libraries/(.+).rb$}) { |m| Dir["spec/unit/recipes/*_spec.rb"] }
+  watch(%r{^resources/(.+).rb$}) { |m| Dir["spec/unit/recipes/*_spec.rb"] }
   watch(%r{^test/fixtures/cookbooks/f5_test/recipes/(.+)\.rb$})   { |m| "spec/unit/recipes/#{m[1]}_spec.rb" }
 
   # Ruby files
