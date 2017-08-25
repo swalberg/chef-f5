@@ -17,7 +17,7 @@ module ChefF5
     def node_is_enabled?(name)
       response = api.LocalLB.NodeAddressV2.get_object_status(name)
 
-      return response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
+      response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
     end
 
     def node_disable!(name)
