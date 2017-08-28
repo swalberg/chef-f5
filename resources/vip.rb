@@ -6,6 +6,9 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :client_ssl_profile, String
+property :server_ssl_profile, String
+property :source_address_translation, [:none, :automap, :snat], default: :none
 
 action :create do
   load_f5_gem
