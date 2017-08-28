@@ -7,6 +7,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :enabled_status, [:manual, :enabled, :disabled], default: node['f5']['enabled_status']
 
 action :create do
   load_f5_gem
@@ -27,6 +28,15 @@ action :create do
   if f5.pool_is_missing_node?(new_resource.name, new_resource.host)
     converge_by("Add #{new_resource.host} to pool #{new_resource.name}") do
       f5.add_node_to_pool(new_resource.name, new_resource.host, new_resource.port)
+    end
+  end
+
+  if new_resource.enabled_status != :manual
+    current_enabled_status = f5.node_is_enabled?(new_resource.host)
+    if (new_resource.enabled_status == :disabled && current_enabled_status == true)
+      f5.node_disable!(new_resource.host)
+    elsif (new_resource.enabled_status == :enabled && current_enabled_status == false)
+      f5.node_enable!(new_resource.host)
     end
   end
 

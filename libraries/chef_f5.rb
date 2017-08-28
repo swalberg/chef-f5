@@ -1,5 +1,6 @@
 module ChefF5
   class Client
+
     def initialize(node, resource, load_balancer)
       @node = node
       @resource = resource
@@ -11,6 +12,20 @@ module ChefF5
 
       return true if response[:item].nil?
       Array(response[:item]).grep(/#{with_partition name}/).empty?
+    end
+
+    def node_is_enabled?(name)
+      response = api.LocalLB.NodeAddressV2.get_object_status(name)
+
+      response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
+    end
+
+    def node_disable!(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_DISABLED])
+    end
+
+    def node_enable!(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED])
     end
 
     def vip_is_missing?(name)
