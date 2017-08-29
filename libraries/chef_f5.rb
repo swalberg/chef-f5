@@ -233,6 +233,9 @@ module ChefF5
       when :snat
         api.LocalLB.VirtualServer
           .set_source_address_translation_snat(with_partition(vip))
+      when :manual
+        raise "Cannot set the source address translation type to `manual`"\
+              " ... what would that even mean?"
       else
         raise "Unrecognized source address translation type:"\
               " #{source_address_translation}"

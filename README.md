@@ -72,7 +72,10 @@ f5_vip 'myvip' do
   port 'vipport'
   protocol 'protocol' # TCP default
   pool 'mypool'
-  source_address_translation :automap # optional; only applied if it is specified
+
+  # this is optional; defaults to :manual so won't touch your setting
+  #                   unless you specify one of the valid options.
+  source_address_translation :automap
 end
 ```
 

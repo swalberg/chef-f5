@@ -8,7 +8,7 @@ property :lb_username, String
 property :lb_password, String
 property :client_ssl_profile, String
 property :server_ssl_profile, String
-property :source_address_translation, [:none, :automap, :snat]
+property :source_address_translation, [:manual, :none, :automap, :snat], default: 'manual'.to_sym
 
 action :create do
   load_f5_gem
@@ -43,7 +43,7 @@ action :create do
     end
   end
 
-  if new_resource.source_address_translation
+  if new_resource.source_address_translation != :manual
     current_sat = f5.source_address_translation(new_resource.name)
 
     unless current_sat == new_resource.source_address_translation
