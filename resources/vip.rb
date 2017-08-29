@@ -8,7 +8,7 @@ property :lb_username, String
 property :lb_password, String
 property :client_ssl_profile, String
 property :server_ssl_profile, String
-property :source_address_translation, [:none, :automap, :snat], default: :none
+property :source_address_translation, [:none, :automap, :snat]
 
 action :create do
   load_f5_gem
