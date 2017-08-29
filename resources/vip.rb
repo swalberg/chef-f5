@@ -42,6 +42,26 @@ action :create do
       end
     end
   end
+
+  if new_resource.source_address_translation
+    current_sat = f5.source_address_translation(new_resource.name)
+
+    unless current_sat == new_resource.source_address_translation
+
+      converge_by("Change server source address translation from"\
+                  " `#{current_sat}` to"\
+                  " `#{new_resource.source_address_translation}`") do
+
+        f5.set_source_address_translation(
+          new_resource.name,
+          new_resource.source_address_translation)
+
+        Chef::Log.info("Changed server source address translation from"\
+                    " `#{current_sat}` to"\
+                    " `#{new_resource.source_address_translation}`")
+      end
+    end
+  end
 end
 
 action_class do

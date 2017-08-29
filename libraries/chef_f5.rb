@@ -161,7 +161,7 @@ module ChefF5
           p[:profile_context] == 1 # PROFILE_CONTEXT_TYPE_CLIENT
         end
 
-      client_profiles.any? do |p| 
+      client_profiles.any? do |p|
         p[:profile_name] == with_partition(profile_name)
       end
     end
@@ -197,6 +197,46 @@ module ChefF5
             profile_name: with_partition(profile_name)
           }]]
         )
+    end
+
+    def source_address_translation(vip)
+      response = api.LocalLB.VirtualServer.get_source_address_translation_type(
+        [with_partition(vip)]
+      )
+
+      raw_src_trans_type = response[:item][0]
+
+      src_trans_type_map = {
+        # when 0 # SCR_TRANS_UNKNOWN
+        none: 1, # SCR_TRANS_NONE
+        automap: 2, # SCR_TRANS_AUTOMAP
+        snat: 3 # SCR_TRANS_SNATPOOL
+        # when 4 # SCR_TRANS_LSNPOOL
+      }
+
+      src_trans_type = src_trans_type_map.key(raw_src_trans_type)
+
+      raise "Unrecognized source translation type:"\
+            " `#{src_trans_type}`" unless src_trans_type
+
+      src_trans_type
+    end
+
+    def set_source_address_translation(vip, source_address_translation)
+      case source_address_translation
+      when :none
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_none(with_partition(vip))
+      when :automap
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_automap(with_partition(vip))
+      when :snat
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_snat(with_partition(vip))
+      else
+        raise "Unrecognized source address translation type:"\
+              " #{source_address_translation}"
+      end
     end
 
     private

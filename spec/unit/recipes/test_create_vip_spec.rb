@@ -37,10 +37,20 @@ describe 'f5_test::test_create_vip' do
 
   context 'when managing the vip' do
     before do
-      # a new vip has no profiles
+      # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
         { item: [[]] }
       }
+
+      # these vips have their SAT set to None
+      allow(server_api)
+        .to receive(:get_source_address_translation_type) {
+          {
+            item: [
+              1 # SRC_TRANS_NONE
+            ]
+          }
+        }
     end
 
     context 'and the vip does not exist' do
