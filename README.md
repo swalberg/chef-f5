@@ -124,8 +124,8 @@ f5_vip 'myvip' do
   port 'vipport'
   protocol 'protocol' # TCP default
   pool 'mypool'
-  client_ssl_profile '/Common/client.cert'
-  server_ssl_profile '/Common/server.cert'
+  client_ssl_profile 'client.cert'
+  server_ssl_profile 'server.cert'
 end
 ```
 
