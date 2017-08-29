@@ -72,6 +72,7 @@ f5_vip 'myvip' do
   port 'vipport'
   protocol 'protocol' # TCP default
   pool 'mypool'
+  source_address_translation :automap # optional; only applied if it is specified
 end
 ```
 
@@ -109,6 +110,25 @@ end
 ```
 
 and `node['f5']['enabled_status']` defaults to `:manual` so it won't touch the enabled status of your node in the pool unless you explicitly ask it to.
+
+#### Managing virtual server client and server ssl profiles
+
+The `f5_vip` resource exposes a pair or properties which allow you to add client and server SSL profiles to a virtual server.
+
+```ruby
+f5_vip 'myvip' do
+  address 'vipaddress'
+  port 'vipport'
+  protocol 'protocol' # TCP default
+  pool 'mypool'
+  client_ssl_profile '/Common/client.cert'
+  server_ssl_profile '/Common/server.cert'
+end
+```
+
+These two properties are optional and only take effect if they are specified.
+
+They will converge to ensure that profile is applied to the given vip, but there is currently no option to remove an SSL profile.
 
 ## Testing
 
