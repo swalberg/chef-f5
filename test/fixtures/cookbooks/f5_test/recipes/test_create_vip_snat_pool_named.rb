@@ -3,7 +3,6 @@ f5_vip 'myvip' do
   port '80'
   protocol 'PROTOCOL_TCP'
   pool 'reallybasic'
-  client_ssl_profile 'client.cert'
-  server_ssl_profile 'server.cert'
-  snat_pool :automap
+
+  snat_pool 'mysnatpool'
 end

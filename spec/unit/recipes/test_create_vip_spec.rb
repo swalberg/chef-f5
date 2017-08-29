@@ -45,12 +45,9 @@ describe 'f5_test::test_create_vip' do
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
-          {
-            item: [
-              1 # SRC_TRANS_NONE
-            ]
-          }
-        }
+          { item: [
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
+          ]}}
     end
 
     context 'and the vip does not exist' do

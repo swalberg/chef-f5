@@ -1,13 +1,12 @@
 require 'spec_helper'
 require 'f5/icontrol'
-require 'f5/icontrol/locallb/virtual_server/source_address_translation'
 require 'f5/icontrol/locallb/profile_context_type'
 require 'f5/icontrol/locallb/profile_type'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
-describe 'f5_test::test_create_vip_with_certs' do
+describe 'f5_test::test_create_vip_ssl_profiles' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
 
@@ -61,13 +60,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the server profile and sat to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'adds the client ssl profile' do
@@ -94,13 +86,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the server profile to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'does not add the client ssl profile' do
@@ -123,13 +108,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'adds the server ssl profile' do
@@ -153,14 +131,6 @@ describe 'f5_test::test_create_vip_with_certs' do
               profile_name: '/Common/server.cert'
             }]] }
         }
-
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'does not add the server ssl profile' do
@@ -172,45 +142,6 @@ describe 'f5_test::test_create_vip_with_certs' do
             }]]
           })
         chef_run
-      end
-    end
-
-    context 'and the source address translation type is incorrect' do
-      before do
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]
-          }
-        }
-
-        # must allow the client profile to be set
-        allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
-        }
-        allow(server_api).to receive(:add_profile)
-      end
-
-      it 'sets the source address translation' do
-        expect(server_api).to receive(:set_source_address_translation_automap)
-        chef_run
-      end
-    end
-
-    context 'and the source address translation type is correct' do
-      before do
-        allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
-            ]
-          }
-        }
-      end
-
-      it 'does not set the source address translation' do
-        expect(server_api)
-          .to_not receive(:set_source_address_translation_automap)
       end
     end
   end
@@ -236,13 +167,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the server profile to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'adds the client ssl profile' do
@@ -269,13 +193,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the server profile to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'does not add the client ssl profile' do
@@ -298,13 +215,6 @@ describe 'f5_test::test_create_vip_with_certs' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:add_profile)
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'adds the server ssl profile' do
@@ -328,14 +238,6 @@ describe 'f5_test::test_create_vip_with_certs' do
               profile_name: '/Common/server.cert'
             }]] }
         }
-
-        allow(server_api)
-          .to receive(:get_source_address_translation_type) {
-            { item: [
-                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]}}
-        allow(server_api)
-          .to receive(:set_source_address_translation_automap)
       end
 
       it 'does not add the server ssl profile' do
@@ -347,44 +249,6 @@ describe 'f5_test::test_create_vip_with_certs' do
             }]]
           })
         chef_run
-      end
-    end
-
-    context 'and the source address translation type is incorrect' do
-      before do
-        allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]
-          }
-        }
-
-        # must allow the client profile to be set
-        allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
-        }
-        allow(server_api).to receive(:add_profile)
-      end
-
-      it 'sets the source address translation' do
-        expect(server_api).to receive(:set_source_address_translation_automap)
-        chef_run
-      end
-    end
-
-    context 'and the source address translation type is correct' do
-      before do
-        allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
-            ]
-          }
-        }
-      end
-
-      it 'does not set the source address translation' do
-        expect(server_api)
-          .to_not receive(:set_source_address_translation_automap)
       end
     end
   end

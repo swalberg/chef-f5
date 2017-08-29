@@ -238,7 +238,7 @@ module ChefF5
         #api.LocalLB.VirtualServer
         #  .set_source_address_translation_snat(with_partition(vip))
         raise "Unrecognized source address translation type:"\
-              " #{source_address_translation}"
+              " #{snat_pool}"
       end
     end
 
