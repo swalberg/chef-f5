@@ -157,8 +157,8 @@ module ChefF5
       response = api.LocalLB.VirtualServer.get_profile([with_partition(vip)])
       vip_profiles = response[:item][0]
       client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == 6 || # PROFILE_TYPE_CLIENT_SSL
-          p[:profile_context] == 1 # PROFILE_CONTEXT_TYPE_CLIENT
+          p[:profile_type] == F5::Icontrol::LocalLB::ProfileType::PROFILE_TYPE_CLIENT_SSL ||
+          p[:profile_context] == F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT
         end
 
       client_profiles.any? do |p|
@@ -170,7 +170,7 @@ module ChefF5
       api.LocalLB.VirtualServer.add_profile(
         virtual_servers: [with_partition(vip)],
         profiles: [[{
-            profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT
+            profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT,
             profile_name: with_partition(profile_name)
           }]]
         )
@@ -180,8 +180,8 @@ module ChefF5
       response = api.LocalLB.VirtualServer.get_profile([with_partition(vip)])
       vip_profiles = response[:item][0]
       client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == 5 || # PROFILE_TYPE_SERVER_SSL
-          p[:profile_context] == 2 # PROFILE_CONTEXT_TYPE_SERVER
+          p[:profile_type] == F5::Icontrol::LocalLB::ProfileType::PROFILE_TYPE_SERVER_SSL ||
+          p[:profile_context] == F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER
         end
 
       client_profiles.any? do |p|
@@ -193,7 +193,7 @@ module ChefF5
       api.LocalLB.VirtualServer.add_profile(
         virtual_servers: [with_partition(vip)],
         profiles: [[{
-            profile_context: 2, # PROFILE_CONTEXT_TYPE_SERVER
+            profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER,
             profile_name: with_partition(profile_name)
           }]]
         )
@@ -207,11 +207,11 @@ module ChefF5
       raw_src_trans_type = response[:item][0]
 
       src_trans_type_map = {
-        # when 0 # SCR_TRANS_UNKNOWN
-        none: 1, # SCR_TRANS_NONE
-        automap: 2, # SCR_TRANS_AUTOMAP
-        snat: 3 # SCR_TRANS_SNATPOOL
-        # when 4 # SCR_TRANS_LSNPOOL
+        # F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_UNKNOWN,
+        none: F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE,
+        automap: F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP,
+        snat: F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_SNATPOOL,
+        # F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_LSNPOOL,
       }
 
       src_trans_type = src_trans_type_map.key(raw_src_trans_type)

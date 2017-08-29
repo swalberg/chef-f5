@@ -1,5 +1,8 @@
 require 'spec_helper'
 require 'f5/icontrol'
+require 'f5/icontrol/locallb/virtual_server/source_address_translation'
+require 'f5/icontrol/locallb/profile_context_type'
+require 'f5/icontrol/locallb/profile_type'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
@@ -61,7 +64,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -71,7 +74,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         expect(server_api).to receive(:add_profile).with({
             virtual_servers: ['/Common/myvip'],
             profiles: [[{
-                profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT,
+                profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT,
                 profile_name: '/Common/client.cert'
               }]]
           })
@@ -94,7 +97,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -123,7 +126,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -154,7 +157,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -177,7 +180,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-              1 # SRC_TRANS_NONE
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]
           }
         }
@@ -199,7 +202,7 @@ describe 'f5_test::test_create_vip_with_certs' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              2 # SRC_TRANS_AUTOMAP
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
             ]
           }
         }
@@ -236,7 +239,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -246,7 +249,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         expect(server_api).to receive(:add_profile).with({
             virtual_servers: ['/Common/myvip'],
             profiles: [[{
-                profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT,
+                profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT,
                 profile_name: '/Common/client.cert'
               }]]
           })
@@ -258,8 +261,8 @@ describe 'f5_test::test_create_vip_with_certs' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: [[{
-              profile_type: 6, # PROFILE_TYPE_CLIENT_SSL
-              profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT
+              profile_type: F5::Icontrol::LocalLB::ProfileType::PROFILE_TYPE_CLIENT_SSL,
+              profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT,
               profile_name: '/Common/client.cert'
             }]] }
         }
@@ -269,7 +272,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -279,7 +282,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         expect(server_api).to_not receive(:add_profile).with({
             virtual_servers: anything,
             profiles: [[{
-                profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT
+                profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT,
                 profile_name: anything
               }]]
           })
@@ -298,7 +301,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -308,7 +311,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         expect(server_api).to receive(:add_profile).with({
           virtual_servers: ['/Common/myvip'],
           profiles: [[{
-            profile_context: 2, # PROFILE_CONTEXT_TYPE_SERVER,
+            profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER,
             profile_name: '/Common/server.cert'
             }]]
           })
@@ -320,8 +323,8 @@ describe 'f5_test::test_create_vip_with_certs' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: [[{
-              profile_type: 5, # PROFILE_TYPE_SERVER_SSL
-              profile_context: 2, # PROFILE_CONTEXT_TYPE_SERVER
+              profile_type: F5::Icontrol::LocalLB::ProfileType::PROFILE_TYPE_SERVER_SSL,
+              profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER,
               profile_name: '/Common/server.cert'
             }]] }
         }
@@ -329,7 +332,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
             { item: [
-                1 # SRC_TRANS_NONE
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]}}
         allow(server_api)
           .to receive(:set_source_address_translation_automap)
@@ -339,7 +342,7 @@ describe 'f5_test::test_create_vip_with_certs' do
         expect(server_api).to_not receive(:add_profile).with({
           virtual_servers: anything,
           profiles: [[{
-              profile_context: 2, # PROFILE_CONTEXT_TYPE_SERVER
+              profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER,
               profile_name: anything
             }]]
           })
@@ -351,7 +354,7 @@ describe 'f5_test::test_create_vip_with_certs' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              1 # SRC_TRANS_NONE
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]
           }
         }
@@ -373,7 +376,7 @@ describe 'f5_test::test_create_vip_with_certs' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              2 # SRC_TRANS_AUTOMAP
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
             ]
           }
         }
