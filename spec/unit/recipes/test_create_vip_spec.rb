@@ -36,6 +36,13 @@ describe 'f5_test::test_create_vip' do
   end
 
   context 'when managing the vip' do
+    before do
+      # a new vip has no profiles
+      allow(server_api).to receive(:get_profile) {
+        { item: [[]] }
+      }
+    end
+
     context 'and the vip does not exist' do
       before do
         allow(server_api).to receive(:get_list) {

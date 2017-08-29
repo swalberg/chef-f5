@@ -24,6 +24,24 @@ action :create do
   if f5.vip_default_pool(new_resource.name) != new_resource.pool
     f5.set_vip_pool(new_resource.name, new_resource.pool)
   end
+
+  if new_resource.client_ssl_profile
+    unless f5.has_client_ssl_profile?(new_resource.name, new_resource.client_ssl_profile)
+      converge_by("Add client ssl profile `#{new_resource.client_ssl_profile}` to `#{new_resource.name}`") do
+        f5.add_client_ssl_profile(new_resource.name, new_resource.client_ssl_profile)
+        Chef::Log.info("Added client ssl profile `#{new_resource.client_ssl_profile}` to `#{new_resource.name}`")
+      end
+    end
+  end
+
+  if new_resource.server_ssl_profile
+    unless f5.has_server_ssl_profile?(new_resource.name, new_resource.server_ssl_profile)
+      converge_by("Add server ssl profile `#{new_resource.server_ssl_profile}` to `#{new_resource.name}`") do
+        f5.add_server_ssl_profile(new_resource.name, new_resource.server_ssl_profile)
+        Chef::Log.info("Added server ssl profile `#{new_resource.server_ssl_profile}` to `#{new_resource.name}`")
+      end
+    end
+  end
 end
 
 action_class do

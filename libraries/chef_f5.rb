@@ -153,6 +153,52 @@ module ChefF5
       )
     end
 
+    def has_client_ssl_profile?(vip, profile_name)
+      response = api.LocalLB.VirtualServer.get_profile([with_partition(vip)])
+      vip_profiles = response[:item][0]
+      client_profiles = vip_profiles.select do |p|
+          p[:profile_type] == 6 || # PROFILE_TYPE_CLIENT_SSL
+          p[:profile_context] == 1 # PROFILE_CONTEXT_TYPE_CLIENT
+        end
+
+      client_profiles.any? do |p| 
+        p[:profile_name] == with_partition(profile_name)
+      end
+    end
+
+    def add_client_ssl_profile(vip, profile_name)
+      api.LocalLB.VirtualServer.add_profile(
+        virtual_servers: [with_partition(vip)],
+        profiles: [[{
+            profile_context: 1, # PROFILE_CONTEXT_TYPE_CLIENT
+            profile_name: with_partition(profile_name)
+          }]]
+        )
+    end
+
+    def has_server_ssl_profile?(vip, profile_name)
+      response = api.LocalLB.VirtualServer.get_profile([with_partition(vip)])
+      vip_profiles = response[:item][0]
+      client_profiles = vip_profiles.select do |p|
+          p[:profile_type] == 5 || # PROFILE_TYPE_SERVER_SSL
+          p[:profile_context] == 2 # PROFILE_CONTEXT_TYPE_SERVER
+        end
+
+      client_profiles.any? do |p|
+        p[:profile_name] == with_partition(profile_name)
+      end
+    end
+
+    def add_server_ssl_profile(vip, profile_name)
+      api.LocalLB.VirtualServer.add_profile(
+        virtual_servers: [with_partition(vip)],
+        profiles: [[{
+            profile_context: 2, # PROFILE_CONTEXT_TYPE_SERVER
+            profile_name: with_partition(profile_name)
+          }]]
+        )
+    end
+
     private
 
     def with_partition(key)
@@ -166,7 +212,7 @@ module ChefF5
     def api
       @api ||= begin
                  credentials = ChefF5::Credentials.new(@node, @resource).credentials_for(@load_balancer)
-                 api = F5::Icontrol::API.new(
+                 F5::Icontrol::API.new(
                    nil,
                    host: credentials[:host],
                    username: credentials[:username],
