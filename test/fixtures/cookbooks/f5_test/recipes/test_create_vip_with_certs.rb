@@ -5,5 +5,5 @@ f5_vip 'myvip' do
   pool 'reallybasic'
   client_ssl_profile 'client.cert'
   server_ssl_profile 'server.cert'
-  source_address_translation :automap
+  snat_pool :automap
 end

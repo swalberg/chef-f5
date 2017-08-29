@@ -199,7 +199,7 @@ module ChefF5
         )
     end
 
-    def source_address_translation(vip)
+    def get_snat_pool(vip)
       response = api.LocalLB.VirtualServer.get_source_address_translation_type(
         [with_partition(vip)]
       )
@@ -222,21 +222,21 @@ module ChefF5
       src_trans_type
     end
 
-    def set_source_address_translation(vip, source_address_translation)
-      case source_address_translation
+    def set_snat_pool(vip, snat_pool)
+      case snat_pool
       when :none
         api.LocalLB.VirtualServer
           .set_source_address_translation_none(with_partition(vip))
       when :automap
         api.LocalLB.VirtualServer
           .set_source_address_translation_automap(with_partition(vip))
-      when :snat
-        api.LocalLB.VirtualServer
-          .set_source_address_translation_snat(with_partition(vip))
       when :manual
         raise "Cannot set the source address translation type to `manual`"\
               " ... what would that even mean?"
       else
+        #when :snat
+        #api.LocalLB.VirtualServer
+        #  .set_source_address_translation_snat(with_partition(vip))
         raise "Unrecognized source address translation type:"\
               " #{source_address_translation}"
       end

@@ -8,7 +8,7 @@ property :lb_username, String
 property :lb_password, String
 property :client_ssl_profile, String
 property :server_ssl_profile, String
-property :source_address_translation, [:manual, :none, :automap, :snat], default: 'manual'.to_sym
+property :snat_pool, [:manual, :none, :automap, String], default: :manual
 
 action :create do
   load_f5_gem
@@ -43,22 +43,20 @@ action :create do
     end
   end
 
-  if new_resource.source_address_translation != :manual
-    current_sat = f5.source_address_translation(new_resource.name)
+  if new_resource.snat_pool != :manual
+    current_sat = f5.get_snat_pool(new_resource.name)
 
-    unless current_sat == new_resource.source_address_translation
+    unless current_sat == new_resource.snat_pool
 
       converge_by("Change server source address translation from"\
                   " `#{current_sat}` to"\
-                  " `#{new_resource.source_address_translation}`") do
+                  " `#{new_resource.snat_pool}`") do
 
-        f5.set_source_address_translation(
-          new_resource.name,
-          new_resource.source_address_translation)
+        f5.set_snat_pool(new_resource.name, new_resource.snat_pool)
 
         Chef::Log.info("Changed server source address translation from"\
                     " `#{current_sat}` to"\
-                    " `#{new_resource.source_address_translation}`")
+                    " `#{new_resource.snat_pool}`")
       end
     end
   end

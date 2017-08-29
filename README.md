@@ -75,7 +75,7 @@ f5_vip 'myvip' do
 
   # this is optional; defaults to :manual so won't touch your setting
   #                   unless you specify one of the valid options.
-  source_address_translation :automap
+  snat_pool :automap
 end
 ```
 
