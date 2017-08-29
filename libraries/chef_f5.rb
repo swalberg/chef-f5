@@ -234,11 +234,12 @@ module ChefF5
         raise "Cannot set the source address translation type to `manual`"\
               " ... what would that even mean?"
       else
-        #when :snat
-        #api.LocalLB.VirtualServer
-        #  .set_source_address_translation_snat(with_partition(vip))
-        raise "Unrecognized source address translation type:"\
-              " #{snat_pool}"
+        # assume that the requested snat_pool is already defined on the F5
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_snat_pool({
+            virtual_servers: [with_partition(vip)],
+            pools: [with_partition(snat_pool)]
+          })
       end
     end
 

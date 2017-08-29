@@ -80,7 +80,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]
           }
         }

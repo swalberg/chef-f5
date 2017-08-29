@@ -44,18 +44,18 @@ action :create do
   end
 
   if new_resource.snat_pool != :manual
-    current_sat = f5.get_snat_pool(new_resource.name)
+    current_snat_pool = f5.get_snat_pool(new_resource.name)
 
-    unless current_sat == new_resource.snat_pool
+    unless current_snat_pool == new_resource.snat_pool
 
       converge_by("Change server source address translation from"\
-                  " `#{current_sat}` to"\
+                  " `#{current_snat_pool}` to"\
                   " `#{new_resource.snat_pool}`") do
 
         f5.set_snat_pool(new_resource.name, new_resource.snat_pool)
 
         Chef::Log.info("Changed server source address translation from"\
-                    " `#{current_sat}` to"\
+                    " `#{current_snat_pool}` to"\
                     " `#{new_resource.snat_pool}`")
       end
     end

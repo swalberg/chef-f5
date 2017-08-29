@@ -89,7 +89,12 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
       end
 
       it 'sets the SNAT pool' do
-        expect(server_api).to receive(:set_source_address_translation_automap)
+        expect(server_api)
+          .to receive(:set_source_address_translation_snat_pool)
+          .with({
+              virtual_servers: ['/Common/myvip'],
+              pools: ['/Common/mysnatpool']
+            })
         chef_run
       end
     end
@@ -98,7 +103,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_SNATPOOL
             ]
           }
         }
@@ -106,7 +111,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
 
       it 'does not set the SNAT pool' do
         expect(server_api)
-          .to_not receive(:set_source_address_translation_automap)
+          .to_not receive(:set_source_address_translation_snat_pool)
       end
     end
   end
@@ -141,7 +146,12 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
       end
 
       it 'sets the SNAT pool' do
-        expect(server_api).to receive(:set_source_address_translation_automap)
+        expect(server_api)
+          .to receive(:set_source_address_translation_snat_pool)
+          .with({
+              virtual_servers: ['/Common/myvip'],
+              pools: ['/Common/mysnatpool']
+            })
         chef_run
       end
     end
@@ -150,7 +160,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
           { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
+              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
             ]
           }
         }
@@ -158,7 +168,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
 
       it 'does not set the SNAT pool' do
         expect(server_api)
-          .to_not receive(:set_source_address_translation_automap)
+          .to_not receive(:set_source_address_translation_snat_pool)
       end
     end
   end
