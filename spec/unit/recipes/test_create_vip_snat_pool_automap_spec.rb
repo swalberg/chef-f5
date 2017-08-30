@@ -1,8 +1,6 @@
 require 'spec_helper'
 require 'f5/icontrol'
 require 'f5/icontrol/locallb/virtual_server/source_address_translation'
-require 'f5/icontrol/locallb/profile_context_type'
-require 'f5/icontrol/locallb/profile_type'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
@@ -10,6 +8,9 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_vip_snat_pool_automap' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
+  let(:sat_type) {
+    F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType
+  }
 
   let(:chef_run) do
     ChefSpec::SoloRunner.new(
@@ -57,10 +58,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
       before do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
-            { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]
-          }
+            { item: sat_type::SRC_TRANS_NONE.member }
         }
 
         # must allow the client profile to be set
@@ -79,10 +77,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
     context 'and the SNAT pool type is correct' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]
-          }
+          { item: sat_type::SRC_TRANS_AUTOMAP.member }
         }
       end
 
@@ -109,10 +104,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
     context 'and the SNAT pool type is incorrect' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-            ]
-          }
+          { item: sat_type::SRC_TRANS_NONE.member }
         }
 
         # must allow the client profile to be set
@@ -131,10 +123,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
     context 'and the SNAT pool type is correct' do
       before do
         allow(server_api).to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_AUTOMAP
-            ]
-          }
+          { item: sat_type::SRC_TRANS_AUTOMAP.member }
         }
       end
 

@@ -27,18 +27,18 @@ action :create do
 
   if new_resource.client_ssl_profile
     unless f5.has_client_ssl_profile?(new_resource.name, new_resource.client_ssl_profile)
-      converge_by("Add client ssl profile `#{new_resource.client_ssl_profile}` to `#{new_resource.name}`") do
+      converge_by("Add client ssl profile '#{new_resource.client_ssl_profile}' to '#{new_resource.name}'") do
         f5.add_client_ssl_profile(new_resource.name, new_resource.client_ssl_profile)
-        Chef::Log.info("Added client ssl profile `#{new_resource.client_ssl_profile}` to `#{new_resource.name}`")
+        Chef::Log.info("Added client ssl profile '#{new_resource.client_ssl_profile}' to '#{new_resource.name}'")
       end
     end
   end
 
   if new_resource.server_ssl_profile
     unless f5.has_server_ssl_profile?(new_resource.name, new_resource.server_ssl_profile)
-      converge_by("Add server ssl profile `#{new_resource.server_ssl_profile}` to `#{new_resource.name}`") do
+      converge_by("Add server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'") do
         f5.add_server_ssl_profile(new_resource.name, new_resource.server_ssl_profile)
-        Chef::Log.info("Added server ssl profile `#{new_resource.server_ssl_profile}` to `#{new_resource.name}`")
+        Chef::Log.info("Added server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'")
       end
     end
   end
@@ -49,14 +49,14 @@ action :create do
     unless current_snat_pool == new_resource.snat_pool
 
       converge_by("Change server source address translation from"\
-                  " `#{current_snat_pool}` to"\
-                  " `#{new_resource.snat_pool}`") do
+                  " '#{current_snat_pool}' to"\
+                  " '#{new_resource.snat_pool}'") do
 
         f5.set_snat_pool(new_resource.name, new_resource.snat_pool)
 
         Chef::Log.info("Changed server source address translation from"\
-                    " `#{current_snat_pool}` to"\
-                    " `#{new_resource.snat_pool}`")
+                    " '#{current_snat_pool}' to"\
+                    " '#{new_resource.snat_pool}'")
       end
     end
   end
