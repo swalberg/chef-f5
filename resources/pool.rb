@@ -34,9 +34,13 @@ action :create do
   if new_resource.enabled_status != :manual
     current_enabled_status = f5.node_is_enabled?(new_resource.host)
     if (new_resource.enabled_status == :disabled && current_enabled_status == true)
-      f5.node_disable!(new_resource.host)
+      converge_by("Disabling '#{new_resource.host}' (was previously enabled)") do
+        f5.node_disable(new_resource.host)
+      end
     elsif (new_resource.enabled_status == :enabled && current_enabled_status == false)
-      f5.node_enable!(new_resource.host)
+      converge_by("Enabling '#{new_resource.host}' (was previously disabled)") do
+        f5.node_enable(new_resource.host)
+      end
     end
   end
 

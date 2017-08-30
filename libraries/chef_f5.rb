@@ -1,3 +1,4 @@
+require 'f5/icontrol/common/enabled_state'
 require 'f5/icontrol/locallb/enabled_status'
 require 'f5/icontrol/locallb/profile_type'
 require 'f5/icontrol/locallb/profile_context_type'
@@ -12,8 +13,11 @@ module ChefF5
       @load_balancer = load_balancer
     end
 
+    # local module aliases reduce repetetive call chains
     ProfileContextType = F5::Icontrol::LocalLB::ProfileContextType
-    ProfileType = F5::Icontrol::LocalLB::ProfileType
+    ProfileType        = F5::Icontrol::LocalLB::ProfileType
+    EnabledStatus      = F5::Icontrol::LocalLB::EnabledStatus
+    EnabledState       = F5::Icontrol::Common::EnabledState
 
     def node_is_missing?(name)
       response = api.LocalLB.NodeAddressV2.get_list
@@ -23,17 +27,26 @@ module ChefF5
     end
 
     def node_is_enabled?(name)
-      response = api.LocalLB.NodeAddressV2.get_object_status(name)
+      response = api.LocalLB.NodeAddressV2.get_object_status({
+        nodes: { item: [with_partition(name)] }
+      })
 
-      response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
+      response[:item][:enabled_status] ==
+        EnabledStatus::ENABLED_STATUS_ENABLED.member
     end
 
-    def node_disable!(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_DISABLED])
+    def node_disable(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+        nodes: { item: [with_partition(name)] },
+        states: { item: [EnabledState::STATE_DISABLED] }
+      })
     end
 
-    def node_enable!(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED])
+    def node_enable(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+        nodes: { item: [with_partition(name)] },
+        states: { item: [EnabledState::STATE_ENABLED] }
+      })
     end
 
     def vip_is_missing?(name)
