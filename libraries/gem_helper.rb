@@ -2,9 +2,11 @@ module ChefF5
   module GemHelper
     def load_f5_gem
       require 'f5/icontrol'
+      require 'f5/icontrol/locallb/virtual_server/source_address_translation'
     rescue LoadError
       install_f5_gem
       require 'f5/icontrol'
+      require 'f5/icontrol/locallb/virtual_server/source_address_translation'
     end
 
     def install_f5_gem

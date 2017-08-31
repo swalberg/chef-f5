@@ -1,3 +1,9 @@
+require 'f5/icontrol/common/enabled_state'
+require 'f5/icontrol/locallb/enabled_status'
+require 'f5/icontrol/locallb/profile_type'
+require 'f5/icontrol/locallb/profile_context_type'
+require 'f5/icontrol/locallb/virtual_server/source_address_translation'
+
 module ChefF5
   class Client
 
@@ -7,6 +13,12 @@ module ChefF5
       @load_balancer = load_balancer
     end
 
+    # local module aliases reduce repetetive call chains
+    ProfileContextType = F5::Icontrol::LocalLB::ProfileContextType
+    ProfileType        = F5::Icontrol::LocalLB::ProfileType
+    EnabledStatus      = F5::Icontrol::LocalLB::EnabledStatus
+    EnabledState       = F5::Icontrol::Common::EnabledState
+
     def node_is_missing?(name)
       response = api.LocalLB.NodeAddressV2.get_list
 
@@ -15,17 +27,26 @@ module ChefF5
     end
 
     def node_is_enabled?(name)
-      response = api.LocalLB.NodeAddressV2.get_object_status(name)
+      response = api.LocalLB.NodeAddressV2.get_object_status({
+        nodes: { item: [with_partition(name)] }
+      })
 
-      response[:enabled_status][0] == F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED
+      response[:item][:enabled_status] ==
+        EnabledStatus::ENABLED_STATUS_ENABLED.member
     end
 
-    def node_disable!(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_DISABLED])
+    def node_disable(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+        nodes: { item: [with_partition(name)] },
+        states: { item: [EnabledState::STATE_DISABLED] }
+      })
     end
 
-    def node_enable!(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state([name], [F5::Icontrol::LocalLB::EnabledStatus::ENABLED_STATUS_ENABLED])
+    def node_enable(name)
+      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+        nodes: { item: [with_partition(name)] },
+        states: { item: [EnabledState::STATE_ENABLED] }
+      })
     end
 
     def vip_is_missing?(name)
@@ -153,6 +174,113 @@ module ChefF5
       )
     end
 
+    def has_client_ssl_profile?(vip, profile_name)
+      response = api.LocalLB.VirtualServer.get_profile({
+          virtual_servers: { item: [with_partition(vip)] }
+        })
+
+      vip_profiles = response[:item][:item]
+
+      client_profiles = vip_profiles.select do |p|
+          p[:profile_type] == ProfileType::PROFILE_TYPE_CLIENT_SSL.member ||
+          p[:profile_context] == ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member
+        end
+
+      client_profiles.any? do |p|
+        p[:profile_name] == with_partition(profile_name)
+      end
+    end
+
+    def add_client_ssl_profile(vip, profile_name)
+      api.LocalLB.VirtualServer.add_profile(
+        virtual_servers: { item: [with_partition(vip)] },
+        profiles: { item: [ { item: [{
+            profile_context: ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: with_partition(profile_name)
+          }]
+        }]
+      })
+    end
+
+    def has_server_ssl_profile?(vip, profile_name)
+      response = api.LocalLB.VirtualServer.get_profile({
+        virtual_servers: { item: [with_partition(vip)] }
+      })
+
+      vip_profiles = response[:item][:item]
+
+      client_profiles = vip_profiles.select do |p|
+          p[:profile_type] == ProfileType::PROFILE_TYPE_SERVER_SSL.member ||
+          p[:profile_context] == ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member
+        end
+
+      client_profiles.any? do |p|
+        p[:profile_name] == with_partition(profile_name)
+      end
+    end
+
+    def add_server_ssl_profile(vip, profile_name)
+      api.LocalLB.VirtualServer.add_profile(
+        virtual_servers: { item: [with_partition(vip)] },
+        profiles: { item: [ { item: [{
+            profile_context: ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: with_partition(profile_name)
+          }]
+        }]
+      })
+    end
+
+    def get_snat_pool(vip)
+      response = api.LocalLB.VirtualServer.get_source_address_translation_type(
+        virtual_servers: { item: [with_partition(vip)] }
+      )
+
+      source_address_translation_type =
+        F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType
+
+      raw_src_trans_type = response[:item]
+
+      src_trans_type_map = {
+        # F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_UNKNOWN,
+        none: source_address_translation_type::SRC_TRANS_NONE.member,
+        automap: source_address_translation_type::SRC_TRANS_AUTOMAP.member,
+        snat: source_address_translation_type::SRC_TRANS_SNATPOOL.member,
+        # F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_LSNPOOL,
+      }
+
+      src_trans_type = src_trans_type_map.key(raw_src_trans_type)
+
+      raise "Unrecognized source translation type:"\
+            " `#{raw_src_trans_type}`" unless src_trans_type
+
+      src_trans_type
+    end
+
+    def set_snat_pool(vip, snat_pool)
+      case snat_pool
+      when :none
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_none({
+            virtual_servers: { item: [with_partition(vip)] }
+          })
+      when :automap
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_automap({
+            virtual_servers: { item: [with_partition(vip)] }
+          })
+      when :manual
+        raise "Cannot set the source address translation type to `manual`"\
+              " ... what would that even mean?"
+      else
+        # assume that the requested snat_pool is already defined on the F5
+        api.LocalLB.VirtualServer
+          .set_source_address_translation_snat_pool({
+            virtual_servers: { item: [with_partition(vip)] },
+            pools: { item: [with_partition(snat_pool)] }
+          })
+      end
+    end
+
     private
 
     def with_partition(key)
@@ -166,7 +294,7 @@ module ChefF5
     def api
       @api ||= begin
                  credentials = ChefF5::Credentials.new(@node, @resource).credentials_for(@load_balancer)
-                 api = F5::Icontrol::API.new(
+                 F5::Icontrol::API.new(
                    nil,
                    host: credentials[:host],
                    username: credentials[:username],
