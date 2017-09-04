@@ -298,5 +298,44 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
         chef_run
       end
     end
+
+    context 'and the vip has one TCP profile' do
+      before do
+        allow(server_api).to receive(:get_profile) {
+          { item:
+            { item:
+              {:profile_type=>"PROFILE_TYPE_TCP", :profile_context=>"PROFILE_CONTEXT_TYPE_ALL", :profile_name=>"/Common/tcp"}
+            }
+          }
+        }
+      end
+
+      it 'adds a client profile' do
+        allow(server_api).to receive(:add_profile)
+
+        expect(server_api).to receive(:add_profile).with({
+          virtual_servers: { item: ['/Common/myvip'] },
+          profiles: { item: [ { item: [ {
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: '/Common/client.cert'
+            }]}]
+          }})
+        chef_run
+      end
+
+      it 'adds a server profile' do
+        allow(server_api).to receive(:add_profile)
+
+        expect(server_api).to receive(:add_profile).with({
+          virtual_servers: anything,
+          profiles: { item: [ { item: [ {
+              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+              profile_name: anything
+            }]
+          }]
+        }})
+        chef_run
+      end
+    end
   end
 end

@@ -179,6 +179,8 @@ module ChefF5
 
       vip_profiles = response[:item][:item]
 
+      vip_profiles = [ vip_profiles ] if (vip_profiles.respond_to?(:has_key?))
+
       client_profiles = vip_profiles.select do |p|
           p[:profile_type] == @ProfileType::PROFILE_TYPE_CLIENT_SSL.member ||
           p[:profile_context] == @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member
@@ -210,6 +212,8 @@ module ChefF5
                           response[:item][:item].length > 0
 
       vip_profiles = response[:item][:item]
+
+      vip_profiles = [ vip_profiles ] if (vip_profiles.respond_to?(:has_key?))
 
       client_profiles = vip_profiles.select do |p|
           p[:profile_type] == @ProfileType::PROFILE_TYPE_SERVER_SSL.member ||
