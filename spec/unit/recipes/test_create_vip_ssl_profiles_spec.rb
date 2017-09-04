@@ -1,7 +1,5 @@
 require 'spec_helper'
 require 'f5/icontrol'
-require 'f5/icontrol/locallb/profile_context_type'
-require 'f5/icontrol/locallb/profile_type'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'

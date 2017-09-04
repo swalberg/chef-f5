@@ -169,6 +169,12 @@ module ChefF5
     end
 
     def has_client_ssl_profile?(vip, profile_name)
+      return has_profile?(vip, profile_name,
+        @ProfileType::PROFILE_TYPE_CLIENT_SSL.member,
+        @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member)
+    end
+
+    def has_profile?(vip, profile_name, profile_type, profile_context)
       response = api.LocalLB.VirtualServer.get_profile({
           virtual_servers: { item: [with_partition(vip)] }
         })
@@ -181,12 +187,12 @@ module ChefF5
 
       vip_profiles = [ vip_profiles ] if (vip_profiles.respond_to?(:has_key?))
 
-      client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == @ProfileType::PROFILE_TYPE_CLIENT_SSL.member ||
-          p[:profile_context] == @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member
+      current_profiles = vip_profiles.select do |p|
+          p[:profile_type] == profile_type &&
+          p[:profile_context] == profile_context
         end
 
-      client_profiles.any? do |p|
+      current_profiles.any? do |p|
         p[:profile_name] == with_partition(profile_name)
       end
     end
@@ -203,26 +209,9 @@ module ChefF5
     end
 
     def has_server_ssl_profile?(vip, profile_name)
-      response = api.LocalLB.VirtualServer.get_profile({
-        virtual_servers: { item: [with_partition(vip)] }
-      })
-
-      return false unless response.length > 0 &&
-                          response[:item].length > 0 &&
-                          response[:item][:item].length > 0
-
-      vip_profiles = response[:item][:item]
-
-      vip_profiles = [ vip_profiles ] if (vip_profiles.respond_to?(:has_key?))
-
-      client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == @ProfileType::PROFILE_TYPE_SERVER_SSL.member ||
-          p[:profile_context] == @ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member
-        end
-
-      client_profiles.any? do |p|
-        p[:profile_name] == with_partition(profile_name)
-      end
+      return has_profile?(vip, profile_name,
+        @ProfileType::PROFILE_TYPE_SERVER_SSL.member,
+        @ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member)
     end
 
     def add_server_ssl_profile(vip, profile_name)
