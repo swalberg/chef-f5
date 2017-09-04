@@ -173,6 +173,10 @@ module ChefF5
           virtual_servers: { item: [with_partition(vip)] }
         })
 
+      return false unless response.length > 0 &&
+                          response[:item].length > 0 &&
+                          response[:item][:item].length > 0
+
       vip_profiles = response[:item][:item]
 
       client_profiles = vip_profiles.select do |p|
@@ -200,6 +204,10 @@ module ChefF5
       response = api.LocalLB.VirtualServer.get_profile({
         virtual_servers: { item: [with_partition(vip)] }
       })
+
+      return false unless response.length > 0 &&
+                          response[:item].length > 0 &&
+                          response[:item][:item].length > 0
 
       vip_profiles = response[:item][:item]
 
