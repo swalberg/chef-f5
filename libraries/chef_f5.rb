@@ -128,6 +128,10 @@ module ChefF5
     end
 
     def create_vip(name, address, port, protocol = 'PROTOCOL_TCP', wildcard = '255.255.255.255')
+      # F5 GUI allows and suggests using '*' to indicate 'any port' but on
+      # submit the '*' is replaced with a '0' and the API only accepts '0'
+      port = 0 if port == '*'
+
       api.LocalLB.VirtualServer.create(definitions: {
                                          item: {
                                            name: with_partition(name),
@@ -155,6 +159,10 @@ module ChefF5
     end
 
     def add_node_to_pool(pool, node, port)
+      # F5 GUI allows and suggests using '*' to indicate 'any port' but on
+      # submit the '*' is replaced with a '0' and the API only accepts '0'
+      port = 0 if port == '*'
+
       api.LocalLB.Pool.add_member_v2(
         pool_names: { item: [with_partition(pool)] },
         members: { item: { item: [{ address: with_partition(node), port: port.to_s }] },

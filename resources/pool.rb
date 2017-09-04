@@ -1,6 +1,6 @@
 property :host, String, regex: /.*/
 property :ip, String, regex: /.*/
-property :port, [String, Integer], regex: /^\d+$/
+property :port, [String, Integer], regex: /^(\*|\d+)$/
 property :monitor, String, regex: /.*/
 property :lb_method, String, regex: /^[A-Z_]+$/
 property :load_balancer, String, regex: /.*/, default: 'default'
