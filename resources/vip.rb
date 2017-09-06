@@ -16,7 +16,7 @@ action :create do
 
   if f5.vip_is_missing?(new_resource.name)
     converge_by("Create vip #{new_resource.name}") do
-      f5.create_vip(new_resource.name, new_resource.pool, new_resource.address, new_resource.port, new_resource.protocol)
+      f5.create_vip(new_resource.name, new_resource.address, new_resource.port, new_resource.protocol)
       Chef::Log.info("#{new_resource} created vip #{new_resource.name} at #{new_resource.address}:#{new_resource.port}/#{new_resource.protocol}")
     end
   end
