@@ -1,5 +1,5 @@
 property :address, String, regex: /.*/
-property :port, [Integer, String], regex: /^\d+$/
+property :port, [Integer, String], regex: /^(\*|\d+)$/
 property :protocol, String, regex: /^[A-Z_]+$/, default: 'PROTOCOL_TCP'
 property :pool, String, regex: /.*/
 property :load_balancer, String, regex: /.*/, default: 'default'
