@@ -19,4 +19,4 @@ gem 'guard-shell'
 gem 'guard-rspec', require: false
 gem 'vagrant-wrapper'
 
-gem 'f5-icontrol', '~> 0.2.7'
+gem 'f5-icontrol', '>= 0.2.7'
