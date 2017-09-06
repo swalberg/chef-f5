@@ -1,9 +1,3 @@
-require 'f5/icontrol/common/enabled_state'
-require 'f5/icontrol/locallb/enabled_status'
-require 'f5/icontrol/locallb/profile_type'
-require 'f5/icontrol/locallb/profile_context_type'
-require 'f5/icontrol/locallb/virtual_server/source_address_translation'
-
 module ChefF5
   class Client
 
@@ -11,13 +5,13 @@ module ChefF5
       @node = node
       @resource = resource
       @load_balancer = load_balancer
-    end
 
-    # local module aliases reduce repetetive call chains
-    ProfileContextType = F5::Icontrol::LocalLB::ProfileContextType
-    ProfileType        = F5::Icontrol::LocalLB::ProfileType
-    EnabledStatus      = F5::Icontrol::LocalLB::EnabledStatus
-    EnabledState       = F5::Icontrol::Common::EnabledState
+      # local module aliases reduce repetetive call chains
+      @ProfileContextType = F5::Icontrol::LocalLB::ProfileContextType
+      @ProfileType        = F5::Icontrol::LocalLB::ProfileType
+      @EnabledStatus      = F5::Icontrol::LocalLB::EnabledStatus
+      @EnabledState       = F5::Icontrol::Common::EnabledState
+    end
 
     def node_is_missing?(name)
       response = api.LocalLB.NodeAddressV2.get_list
@@ -32,20 +26,20 @@ module ChefF5
       })
 
       response[:item][:enabled_status] ==
-        EnabledStatus::ENABLED_STATUS_ENABLED.member
+        @EnabledStatus::ENABLED_STATUS_ENABLED.member
     end
 
     def node_disable(name)
       api.LocalLB.NodeAddressV2.set_session_enabled_state({
         nodes: { item: [with_partition(name)] },
-        states: { item: [EnabledState::STATE_DISABLED] }
+        states: { item: [@EnabledState::STATE_DISABLED] }
       })
     end
 
     def node_enable(name)
       api.LocalLB.NodeAddressV2.set_session_enabled_state({
         nodes: { item: [with_partition(name)] },
-        states: { item: [EnabledState::STATE_ENABLED] }
+        states: { item: [@EnabledState::STATE_ENABLED] }
       })
     end
 
@@ -182,8 +176,8 @@ module ChefF5
       vip_profiles = response[:item][:item]
 
       client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == ProfileType::PROFILE_TYPE_CLIENT_SSL.member ||
-          p[:profile_context] == ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member
+          p[:profile_type] == @ProfileType::PROFILE_TYPE_CLIENT_SSL.member ||
+          p[:profile_context] == @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member
         end
 
       client_profiles.any? do |p|
@@ -195,7 +189,7 @@ module ChefF5
       api.LocalLB.VirtualServer.add_profile(
         virtual_servers: { item: [with_partition(vip)] },
         profiles: { item: [ { item: [{
-            profile_context: ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_context: @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member,
             profile_name: with_partition(profile_name)
           }]
         }]
@@ -210,8 +204,8 @@ module ChefF5
       vip_profiles = response[:item][:item]
 
       client_profiles = vip_profiles.select do |p|
-          p[:profile_type] == ProfileType::PROFILE_TYPE_SERVER_SSL.member ||
-          p[:profile_context] == ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member
+          p[:profile_type] == @ProfileType::PROFILE_TYPE_SERVER_SSL.member ||
+          p[:profile_context] == @ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member
         end
 
       client_profiles.any? do |p|
@@ -223,7 +217,7 @@ module ChefF5
       api.LocalLB.VirtualServer.add_profile(
         virtual_servers: { item: [with_partition(vip)] },
         profiles: { item: [ { item: [{
-            profile_context: ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_context: @ProfileContextType::PROFILE_CONTEXT_TYPE_SERVER.member,
             profile_name: with_partition(profile_name)
           }]
         }]
