@@ -127,13 +127,13 @@ module ChefF5
                                  members: { item: [] })
     end
 
-    def create_vip(name, _pool, address, port, _protocol = 'PROTOCOL_TCP', wildcard = '255.255.255.255')
+    def create_vip(name, address, port, protocol = 'PROTOCOL_TCP', wildcard = '255.255.255.255')
       api.LocalLB.VirtualServer.create(definitions: {
                                          item: {
                                            name: with_partition(name),
                                            address: address,
                                            port: port.to_s,
-                                           protocol: 'PROTOCOL_TCP' },
+                                           protocol: protocol },
                                        },
                                        wildmasks: { item: wildcard },
                                        resources: {
