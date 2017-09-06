@@ -145,7 +145,7 @@ module ChefF5
                                        profiles: {
                                          item: [
                                            item: {
-                                             profile_context: 'PROFILE_CONTEXT_TYPE_ALL',
+                                             profile_context: @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member,
                                              profile_name: 'http' }] })
 
       api.LocalLB.VirtualServer.set_type(
