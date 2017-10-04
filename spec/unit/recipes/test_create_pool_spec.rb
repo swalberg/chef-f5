@@ -34,7 +34,13 @@ describe 'f5_test::test_create_pool' do
 
       it 'creates the pool' do
         expect(api).to receive_message_chain('LocalLB', 'Pool', 'create_v2') { true }
-        chef_run
+
+        expect(chef_run).to create_f5_pool('reallybasic').with(
+          ip: '10.0.0.2',
+          host: 'fauxhai.local',
+          port: 80,
+          monitor: 'test-monitor'
+        )
       end
     end
 

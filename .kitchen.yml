@@ -26,6 +26,8 @@ suites:
       - recipe[f5_test::test_create_pool]
       - recipe[f5_test::test_create_vip]
     attributes:
+      fqdn: local.kitchen.node
+      ipaddress: 127.0.0.1
       f5:
         credentials:
           default:

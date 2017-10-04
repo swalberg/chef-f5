@@ -63,7 +63,13 @@ describe 'f5_test::test_create_vip' do
 
         expect(server_api).to receive(:create)
         expect(server_api).to receive(:set_type)
-        chef_run
+
+        expect(chef_run).to create_f5_vip('myvip').with(
+          address: '86.75.30.9',
+          port: '80',
+          protocol: 'PROTOCOL_TCP',
+          pool: 'reallybasic'
+        )
       end
 
       it 'sets the pool' do

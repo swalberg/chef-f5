@@ -21,12 +21,9 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 - `node['f5']['gem_version']` - Sets the version of the gem that will be installed via the resource
 - `node['f5']['enabled_status']` - Can take one of three values:
-
-  |`enabled_status` value|meaning|
-  |----------------------|-------|
-  | `:manual`            | the default, the `f5_pool` resource does not touch the node's enabled status on load balancer, allowing it to be managed manually on the load balancer |
-  | `:disabled`          | if a node does not exist or does exist but is enabled, the load balancer will be asked to disable the node |
-  | `:enabled`           | if a node does not exist or does exist but is disabled, the load balancer will be asked to enable the node |
+  - `:manual` - the default, the `f5_pool` resource does not touch the node's enabled status on load balancer, allowing it to be managed manually on the load balancer
+  - `:disabled` - if a node does not exist or does exist but is enabled, the load balancer will be asked to disable the node
+  - `:enabled` - if a node does not exist or does exist but is disabled, the load balancer will be asked to enable the node
 
 ## Usage
 
@@ -133,7 +130,41 @@ These two properties are optional and only take effect if they are specified.
 
 They will converge to ensure that profile is applied to the given vip, but there is currently no option to remove an SSL profile.
 
-## Testing
+### Writing specs for vip and pool resources
+
+This coobkook provides custom chefspec matchers so you can write specs like this:
+
+```ruby
+require 'chefspec'
+
+describe 'example::default' do
+  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '16.04').converge(described_recipe) }
+
+  it 'creates the example_com pool (if needed) and adds this node to it' do
+    expect(chef_run).to create_f5_pool('example_com').with(
+      ip: '10.0.0.2',
+      host: 'examplenode01.internaldomain.com',
+      port: 80,
+      monitor: 'test-monitor'
+    )
+  end
+
+  it 'creates the example.com vip' do
+    expect(chef_run).to create_f5_vip('example.com').with(
+      address: '86.75.30.9',
+      port: '80',
+      protocol: 'PROTOCOL_TCP',
+      pool: 'reallybasic'
+    )
+  end
+end
+```
+
+NOTE: these matches verify only the presence (or absence via `expect(chef_run).to_not`) of a resource and the configuration of its properties according to hash passed to the optional `with` method.
+
+The matchers cannot be used to validate whether convergence of an  `f5_pool` or `f5_vip` resource took place.
+
+## Testing this cookbook
 
 Run `bundle exec rake test` to run the chefspec tests.
 
