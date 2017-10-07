@@ -15,7 +15,7 @@ module ChefF5
 
       package packages do
         action :nothing
-      end.run_action(:install)
+      end.run_action(:install) unless packages.nil?
 
       chef_gem 'f5-icontrol' do
         compile_time true

@@ -8,6 +8,7 @@ A set of resources for managing F5 load balancers. Currently a WIP, but it will 
 
 - RHEL/Fedora and derivatives
 - Debian/Ubuntu and derivatives
+- Windows [2012.R2, 2016]
 
 ### Chef
 
