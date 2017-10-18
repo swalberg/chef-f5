@@ -331,7 +331,7 @@ module ChefF5
     end
 
     def with_partition(key)
-      if key =~ %r{^/} || key.to_s.empty?
+      if key =~ %r{^/}
         key
       else
         "/Common/#{key}"
