@@ -74,6 +74,18 @@ f5_vip 'myvip' do
   # this is optional; defaults to :manual so won't touch your setting
   #                   unless you specify one of the valid options.
   snat_pool :automap
+
+  # this is optional; defaults to :manual so won't touch your setting
+  #                   unless you specify one of the valid options.
+  #                   :none disables the firewall_policy,
+  #                   anything else is a named firewall_policy
+  enforced_firewall_policy
+
+  # this is optional; defaults to :manual so won't touch your setting
+  #                   unless you specify one of the valid options.
+  #                   :none disables the firewall_policy,
+  #                   anything else is a named firewall_policy
+  staged_firewall_policy
 end
 ```
 
