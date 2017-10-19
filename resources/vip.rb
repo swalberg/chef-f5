@@ -9,6 +9,8 @@ property :lb_password, String
 property :client_ssl_profile, String
 property :server_ssl_profile, String
 property :snat_pool, [:manual, :none, :automap, String], default: :manual
+property :enforced_firewall_policy, [:manual, :none, String], default: :manual
+property :staged_firewall_policy, [:manual, :none, String], default: :manual
 
 action :create do
   load_f5_gem
@@ -39,6 +41,32 @@ action :create do
       converge_by("Add server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'") do
         f5.add_server_ssl_profile(new_resource.name, new_resource.server_ssl_profile)
         Chef::Log.info("Added server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'")
+      end
+    end
+  end
+
+  if new_resource.enforced_firewall_policy != :manual
+    current_enforced_firewall_policy = f5.vip_enforced_firewall_policy(new_resource.name)
+    unless current_enforced_firewall_policy == new_resource.enforced_firewall_policy
+      if f5.firewall_policy_missing?(new_resource.enforced_firewall_policy)
+        raise "Firewall policy #{new_resource.enforced_firewall_policy} does not exist"
+      end
+      converge_by("Set enforced firewall policy on '#{new_resource.name}' to '#{new_resource.enforced_firewall_policy}'") do
+        f5.set_enforced_firewall_policy(new_resource.name, new_resource.enforced_firewall_policy)
+        Chef::Log.info("Set enforced firewall policy on '#{new_resource.name}' to '#{new_resource.enforced_firewall_policy}'")
+      end
+    end
+  end
+
+  if new_resource.staged_firewall_policy != :manual
+    current_staged_firewall_policy = f5.vip_staged_firewall_policy(new_resource.name)
+    unless current_staged_firewall_policy == new_resource.staged_firewall_policy
+      if f5.firewall_policy_missing?(new_resource.staged_firewall_policy)
+        raise "Firewall policy #{new_resource.staged_firewall_policy} does not exist"
+      end
+      converge_by("Set staged firewall policy on '#{new_resource.name}' to '#{new_resource.staged_firewall_policy}'") do
+        f5.set_staged_firewall_policy(new_resource.name, new_resource.staged_firewall_policy)
+        Chef::Log.info("Set staged firewall policy on '#{new_resource.name}' to '#{new_resource.staged_firewall_policy}'")
       end
     end
   end

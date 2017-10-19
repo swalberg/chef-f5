@@ -284,10 +284,54 @@ module ChefF5
       end
     end
 
+    def firewall_policy_missing?(name)
+      return false if name == :none
+      response = api.Security.FirewallPolicy.get_list
+
+      return true if response[:item].nil?
+      Array(response[:item]).grep(/#{with_partition name}/).empty?
+    end
+
+    def vip_enforced_firewall_policy(vip)
+      response = api.LocalLB.VirtualServer.get_enforced_firewall_policy({
+        virtual_servers: { item: [with_partition(vip)] }
+      })
+      firewall_policy = strip_partition(response[:item])
+      return firewall_policy.to_s.empty? ? :none : firewall_policy
+    end
+
+    def vip_staged_firewall_policy(vip)
+      response = api.LocalLB.VirtualServer.get_staged_firewall_policy({
+        virtual_servers: { item: [with_partition(vip)] }
+      })
+      firewall_policy = strip_partition(response[:item])
+      return firewall_policy.to_s.empty? ? :none : firewall_policy
+    end
+
+    def set_enforced_firewall_policy(vip, firewall_policy)
+      firewall_policy = '' if firewall_policy == :none
+      api.LocalLB.VirtualServer.set_enforced_firewall_policy(
+        virtual_servers: { item: [with_partition(vip)] },
+        policies: { item: [with_partition(firewall_policy)] }
+      )
+    end
+
+    def set_staged_firewall_policy(vip, firewall_policy)
+      firewall_policy = '' if firewall_policy == :none
+      api.LocalLB.VirtualServer.set_staged_firewall_policy(
+        virtual_servers: { item: [with_partition(vip)] },
+        policies: { item: [with_partition(firewall_policy)] }
+      )
+    end
+
     private
 
+    def strip_partition(key)
+      key.gsub(%r{^/Common/}, '') if key
+    end
+
     def with_partition(key)
-      if key =~ %r{^/}
+      if key =~ %r{^/} || key.to_s.empty?
         key
       else
         "/Common/#{key}"
