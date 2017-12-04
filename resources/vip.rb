@@ -12,14 +12,27 @@ property :snat_pool, [:manual, :none, :automap, String], default: :manual
 property :enforced_firewall_policy, [:manual, :none, String], default: :manual
 property :staged_firewall_policy, [:manual, :none, String], default: :manual
 
+IPv4 = %r{^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$}
+
+def resolve_ip(name)
+  if name =~ IPv4
+    name
+  else
+    DNSLookup.new(name).address
+  end
+end
+
 action :create do
   load_f5_gem
   f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer)
+  ip = resolve_ip(new_resource.address)
+
+  next if ip.nil?
 
   if f5.vip_is_missing?(new_resource.name)
     converge_by("Create vip #{new_resource.name}") do
-      f5.create_vip(new_resource.name, new_resource.address, new_resource.port, new_resource.protocol)
-      Chef::Log.info("#{new_resource} created vip #{new_resource.name} at #{new_resource.address}:#{new_resource.port}/#{new_resource.protocol}")
+      f5.create_vip(new_resource.name, ip, new_resource.port, new_resource.protocol)
+      Chef::Log.info("#{new_resource} created vip #{new_resource.name} at #{ip}:#{new_resource.port}/#{new_resource.protocol}")
     end
   end
 
