@@ -66,7 +66,7 @@ end
 
 # Creates the VIP if missing
 f5_vip 'myvip' do
-  address 'vipaddress'
+  address 'vipaddress' # IPv4 or FQDN, see below
   port 'vipport'
   protocol 'protocol' # TCP default
   pool 'mypool'
@@ -90,6 +90,13 @@ end
 ```
 
 See the documentation for [LocalLB::LBMethod](https://devcentral.f5.com/wiki/iControl.LocalLB__LBMethod.ashx) and [protocol](https://devcentral.f5.com/wiki/iControl.Common__ProtocolType.ashx).
+
+#### Using DNS for the name
+
+This is an **experimental feature**. Some of the corner cases might not work :)
+
+If you pass a FQDN to the VIP's address, this resource will attempt to resolve the name through DNS. If a match is found, the first address returned is used for the VIP. If no match is found, the resource will not be processed.
+
 
 #### Manging node enabled status through node attributes
 
