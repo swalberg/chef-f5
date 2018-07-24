@@ -19,13 +19,15 @@ describe 'f5_test::test_create_pool_add_action' do
 
   context 'managing manually enabled nodes' do
     let (:node) { double }
+    let (:pool) { double }
 
     before do
-      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
+      allow(api).to receive_message_chain('LocalLB.Pool') { pool }
+
     end
 
     context 'the node exists' do
@@ -36,6 +38,7 @@ describe 'f5_test::test_create_pool_add_action' do
       end
 
       it 'does not add the node' do
+        expect(pool).to_not receive(:get_list)
         expect(node).to_not receive(:create)
         chef_run
       end
