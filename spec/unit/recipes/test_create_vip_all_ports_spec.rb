@@ -4,7 +4,7 @@ require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
-describe 'f5_test::test_create_vip' do
+describe 'f5_test::test_create_vip_all_ports' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
 
@@ -57,27 +57,36 @@ describe 'f5_test::test_create_vip' do
         }
       end
 
-      it 'creates the vip' do
+      it 'creates the vip with port 0 (i.e. any)' do
         allow_any_instance_of(ChefF5::Client)
           .to receive(:vip_default_pool).and_return('reallybasic')
 
-        expect(server_api).to receive(:create)
-        expect(server_api).to receive(:set_type)
-
-        expect(chef_run).to create_f5_vip('myvip').with(
-          address: '86.75.30.9',
-          port: '80',
-          protocol: 'PROTOCOL_TCP',
-          pool: 'reallybasic'
+        expect(server_api).to receive(:create).with(
+          definitions: {
+            item: {
+            name: '/Common/myvip',
+            address: '86.75.30.9',
+            port: '0',
+            protocol: 'PROTOCOL_TCP' },
+          },
+          wildmasks: { item: '255.255.255.255' },
+          resources: {
+            item: {
+              type: 'RESOURCE_TYPE_REJECT',
+              default_pool_name: '',
+            },
+          },
+          profiles: {
+            item: [
+              item: {
+                profile_context: 'PROFILE_CONTEXT_TYPE_ALL',
+                profile_name: 'http'
+              }
+            ]
+          }
         )
-      end
 
-      it 'sets the pool' do
-        allow_any_instance_of(ChefF5::Client).to receive(:create_vip)
-        allow_any_instance_of(ChefF5::Client)
-          .to receive(:vip_default_pool).and_return(nil)
-
-        expect(server_api).to receive(:set_default_pool_name)
+        expect(server_api).to receive(:set_type)
         chef_run
       end
     end
@@ -93,36 +102,6 @@ describe 'f5_test::test_create_vip' do
         allow_any_instance_of(ChefF5::Client).to receive(:vip_default_pool)
         allow_any_instance_of(ChefF5::Client).to receive(:set_vip_pool)
         chef_run
-      end
-
-      context 'and the desired pool is already set' do
-        before do
-          allow_any_instance_of(ChefF5::Client)
-            .to receive(:vip_default_pool).and_return('reallybasic')
-        end
-
-        it 'does not set the pool' do
-          expect(server_api).to_not receive(:set_default_pool_name)
-          chef_run
-        end
-      end
-
-      context 'and the desired pool is not set' do
-        before do
-          allow_any_instance_of(ChefF5::Client)
-            .to receive(:vip_default_pool).and_return('somethingelse')
-        end
-
-        it 'sets the pool' do
-          allow_any_instance_of(ChefF5::Client).to receive(:create_vip)
-          allow_any_instance_of(ChefF5::Client)
-            .to receive(:vip_default_pool).and_return(nil)
-
-          expect(server_api).to receive(:set_default_pool_name).with(
-            virtual_servers: { item: ['/Common/myvip'] },
-            default_pools: { item: ['/Common/reallybasic'] })
-          chef_run
-        end
       end
     end
   end

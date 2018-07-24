@@ -1,0 +1,10 @@
+Lint/ParenthesesAsGroupedExpression:
+  Exclude:
+    - 'spec/**/*'
+
+Lint/UselessAssignment:
+  Exclude:
+    - 'libraries/chef_f5.rb'
+
+Metrics/ParameterLists:
+  Max: 6
