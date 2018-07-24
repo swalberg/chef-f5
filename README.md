@@ -97,6 +97,11 @@ This is an **experimental feature**. Some of the corner cases might not work :)
 
 If you pass a FQDN to the VIP's address, this resource will attempt to resolve the name through DNS. If a match is found, the first address returned is used for the VIP. If no match is found, the resource will not be processed.
 
+#### `f5_pool` Actions
+
+`f5_pool`'s default action is `:create` which manages the pool and its settings, as well as the node and its settings. If the pool has already been created outside of this recipe and the desired behavior is for chef to fail when the pool doesn't exist use the `:add` action.
+
+The `:add` action will only ensure the node is in the pool and configured correctly, but will not modify the pool. Pool-related attributes are ignored.
 
 #### Manging node enabled status through node attributes
 
@@ -149,6 +154,14 @@ end
 These two properties are optional and only take effect if they are specified.
 
 They will converge to ensure that profile is applied to the given vip, but there is currently no option to remove an SSL profile.
+
+#### Chef-provisioning
+
+The `f5_pool` and `f5_vip` resources can be used _as-is_ in a [chef-provisioning](https://github.com/chef/chef-provisioning) environment. Options exists for some resources that are especially catered to chef-provisioning.
+
+##### `f5_pool`
+
+If the `host` attribute on the `f5_pool` resource is excluded the resource will not attempt to add a node but instead simply manage the pool itself.
 
 ### Writing specs for vip and pool resources
 
