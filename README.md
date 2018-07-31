@@ -87,6 +87,21 @@ f5_vip 'myvip' do
   #                   anything else is a named firewall_policy
   staged_firewall_policy
 end
+
+# Create a F5 monitor template
+f5_monitor 'test-monitor' do 
+  # Required properties
+  template_type 'TTYPE_HTTP' # F5 template type
+  parent_template 'http'
+  interval 5 # frequency to check in seconds
+  timeout 3 # seconds to respond
+  
+  #optional properties (default values are shown)
+  dest_ip '0.0.0.0' # tells f5 what address to test. Default indicates to test each node in pool 
+  dest_port '0' # tells f5 which port to test; Default indicates to test all ports that are open
+  read_only false # specifies if this template is read only
+  is_directly_usable true # specifies if the template can be directly used
+end
 ```
 
 See the documentation for [LocalLB::LBMethod](https://devcentral.f5.com/wiki/iControl.LocalLB__LBMethod.ashx) and [protocol](https://devcentral.f5.com/wiki/iControl.Common__ProtocolType.ashx).
