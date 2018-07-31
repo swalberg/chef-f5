@@ -97,8 +97,8 @@ f5_monitor 'test-monitor' do
   timeout 3 # seconds to respond
   
   #optional properties (default values are shown)
-  dest_ip '0.0.0.0' # tells f5 what address to test. Default indicates to test each node in pool 
-  dest_port '0' # tells f5 which port to test; Default indicates to test all ports that are open
+  dest_ip '0.0.0.0' # tells f5 what address to test. Default indicates to test the node the monitor is applied to
+  dest_port '0' # tells f5 which port to test; Default indicates to test the port the monitor is applied to
   read_only false # specifies if this template is read only
   is_directly_usable true # specifies if the template can be directly used
 end
