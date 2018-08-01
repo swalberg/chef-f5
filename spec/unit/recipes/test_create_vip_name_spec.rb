@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'f5/icontrol'
-require_relative '../../../libraries/chef_f5'
+require_relative '../../../libraries/vip'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/dns_lookup'
 require_relative '../../../libraries/gem_helper'
@@ -70,7 +70,7 @@ describe 'f5_test::test_create_vip_name' do
       end
 
       it 'creates the vip' do
-        allow_any_instance_of(ChefF5::Client)
+        allow_any_instance_of(ChefF5::VIP)
           .to receive(:vip_default_pool).and_return('reallybasic')
 
         allow_any_instance_of(DNSLookup)
@@ -99,8 +99,8 @@ describe 'f5_test::test_create_vip_name' do
       end
 
       it 'does not create the vip' do
-        allow_any_instance_of(ChefF5::Client).to receive(:vip_default_pool)
-        allow_any_instance_of(ChefF5::Client).to receive(:set_vip_pool)
+        allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
+        allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
         chef_run
       end
     end

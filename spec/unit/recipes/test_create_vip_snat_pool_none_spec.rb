@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'f5/icontrol'
 require 'f5/icontrol/locallb/virtual_server/source_address_translation'
-require_relative '../../../libraries/chef_f5'
+require_relative '../../../libraries/vip'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
