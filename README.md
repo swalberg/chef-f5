@@ -102,6 +102,19 @@ f5_monitor 'test-monitor' do
   read_only false # specifies if this template is read only
   is_directly_usable true # specifies if the template can be directly used
 end
+
+# Create an F5 IRule
+f5_irule 'test-irule' do 
+  # IRule definition
+  definition <<-EOL
+# For hosts that serve both http but attached to http and https vips, 
+# this lets them know if the request
+# originally came in on https
+when HTTP_REQUEST {
+  HTTP::header insert HTTPS true
+}
+  EOL
+end
 ```
 
 See the documentation for [LocalLB::LBMethod](https://devcentral.f5.com/wiki/iControl.LocalLB__LBMethod.ashx) and [protocol](https://devcentral.f5.com/wiki/iControl.Common__ProtocolType.ashx).
