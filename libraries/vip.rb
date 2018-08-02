@@ -1,4 +1,5 @@
 require_relative './base_client'
+require_relative './hash_diff'
 
 module ChefF5
   class VIP < BaseClient
@@ -204,6 +205,49 @@ module ChefF5
       api.LocalLB.VirtualServer.set_staged_firewall_policy(
         virtual_servers: { item: [with_partition(vip)] },
         policies: { item: [with_partition(firewall_policy)] }
+      )
+    end
+
+    def irules_changed?(vip, target_rules)
+      current = api.LocalLB.VirtualServer.get_rule(virtual_servers: { item: [with_partition(vip)]})
+      current_value = current[:item][:item]
+      current_rules = case
+                      when current_value.nil?
+                        {}
+                      when current_value.is_a?(Hash)
+                        {current_value[:rule_name] => current_value[:priority]}
+                      else
+                        current_value.each_with_object({}) do |irule, out|
+                          out[irule[:rule_name]] = irule[:priority]
+                        end
+                      end
+
+      partitioned_target = target_rules.each_with_object({}) do |(k,v), out|
+        out[with_partition(k)] = v.to_s
+      end
+      HashDiff.diff(partitioned_target, current_rules)
+    end
+
+    def update_irules(vip, irules, added, changed, removed)
+      added.to_a.each { |r| create_rule vip, r, irules[strip_partition(r)].to_s }
+      changed.to_a.each { |r| update_rule vip, r, irules[strip_partition(r)].to_s }
+      removed.to_a.each { |r| remove_rule vip, r }
+    end
+
+    def remove_rule(vip, rule)
+      api.LocalLB.VirtualServer.remove_rule(virtual_servers: { item: [with_partition(vip)]},
+                                            rules: { item: { item: [{ rule_name: with_partition(rule), priority: '0' }] }}
+      )
+    end
+
+    def update_rule(vip, rule_name, priority)
+      remove_rule(vip, rule_name)
+      create_rule(vip, rule_name, priority)
+    end
+
+    def create_rule(vip, rule_name, priority)
+      api.LocalLB.VirtualServer.add_rule(virtual_servers: { item: [with_partition(vip)]},
+                                         rules: { item: { item: [{ rule_name: with_partition(rule_name), priority: priority }]}}
       )
     end
   end

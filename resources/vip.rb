@@ -11,6 +11,7 @@ property :server_ssl_profile, String
 property :snat_pool, [:manual, :none, :automap, String], default: :manual
 property :enforced_firewall_policy, [:manual, :none, String], default: :manual
 property :staged_firewall_policy, [:manual, :none, String], default: :manual
+property :irules, Hash, default: {}
 
 IPv4 = %r{^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$}
 
@@ -99,6 +100,16 @@ action :create do
                     " '#{current_snat_pool}' to"\
                     " '#{new_resource.snat_pool}'")
       end
+    end
+  end
+  added, changed, removed = vip.irules_changed?(new_resource.name, new_resource.irules)
+  unless [added, changed, removed].all? { |l| l.empty? }
+    msg = "Update IRules for #{new_resource.name}; "\
+      "The following rules changed: #{changed.join ', '}."\
+      "The following rules have been added: #{added.to_a.join ', '}"\
+      "The following rules have been removed: #{removed.to_a.join ', '}"
+    converge_by msg do
+      vip.update_irules(new_resource.name, new_resource.irules, added, changed, removed)
     end
   end
 end

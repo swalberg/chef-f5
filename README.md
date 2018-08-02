@@ -86,6 +86,16 @@ f5_vip 'myvip' do
   #                   :none disables the firewall_policy,
   #                   anything else is a named firewall_policy
   staged_firewall_policy
+  
+  # this is optional; If this VIP has IRules on the F5, this resource
+  #                   will remove them and insert exactly what is specified
+  #                   here. The attribute takes in a hash of `IRule Name`: `Priority`.
+  #                   When changing priority you must not reuse a priority number. E.g.
+  #                   given the state below, to change the order of irules set priorities 
+  #                   to `irules('test-irule-2' => 1, 'test-irule' => 2)`, rather than simply
+  #                   swapping the priority values as this will cause a `Priorities must be unique` 
+  #                   since irule associations are update sequentially error.
+  irules('test-irule' => 0, 'test-irule-2' => 1)
 end
 
 # Create a F5 monitor template
