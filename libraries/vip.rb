@@ -1,5 +1,5 @@
 require_relative './base_client'
-require_relative './hash_diff'
+require_relative './irule_diff'
 
 module ChefF5
   class VIP < BaseClient
@@ -222,15 +222,15 @@ module ChefF5
                         end
                       end
 
-      partitioned_target = target_rules.each_with_object({}) do |(k,v), out|
-        out[with_partition(k)] = v.to_s
+      partitioned_targets = target_rules.map do |rule|
+        with_partition(rule)
       end
-      HashDiff.diff(partitioned_target, current_rules)
+      IRuleDiff.diff(partitioned_targets, current_rules)
     end
 
     def update_irules(vip, irules, added, changed, removed)
-      added.to_a.each { |r| create_rule vip, r, irules[strip_partition(r)].to_s }
-      changed.to_a.each { |r| update_rule vip, r, irules[strip_partition(r)].to_s }
+      added.to_a.each { |r| create_rule vip, r, irules[r].to_s }
+      changed.to_a.each { |r| update_rule vip, r, irules[r].to_s }
       removed.to_a.each { |r| remove_rule vip, r }
     end
 

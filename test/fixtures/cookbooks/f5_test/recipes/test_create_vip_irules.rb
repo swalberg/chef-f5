@@ -3,5 +3,5 @@ f5_vip 'myvip' do
   port '80'
   protocol 'PROTOCOL_TCP'
   pool 'reallybasic'
-  irules('test-irule' => 0, 'test-irule-2' => 1)
+  irules %w(test-irule test-irule-2)
 end

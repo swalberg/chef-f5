@@ -82,19 +82,17 @@ describe 'f5_test::test_create_vip_irules' do
     end
     context 'and the IRules have changed' do
       before do
-        allow(server_api).to receive(:get_rule).and_return({item: {item: [{rule_name: '/Common/test-irule', priority: '4'}, {rule_name: '/Common/test-irule-2', priority: '5'}]}})
+        allow(server_api).to receive(:get_rule).and_return({item: {item: [{rule_name: '/Common/test-irule', priority: '1'}, {rule_name: '/Common/test-irule-2', priority: '0'}]}})
         allow_any_instance_of(ChefF5::VIP)
           .to receive(:vip_default_pool).and_return('reallybasic')
+        # allow_any_instance_of(ChefF5::VIP)
+        #   .to receive(:irules_changed?).and_return([[],[],[],{}])
       end
       it 'updates the irules' do
         expect(server_api).to receive(:remove_rule).with(virtual_servers: { item: ['/Common/myvip']},
-                                                    rules: { item: { item: [{ rule_name: '/Common/test-irule', priority: '0' }]}})
-        expect(server_api).to receive(:add_rule).with(virtual_servers: { item: ['/Common/myvip']},
-                                         rules: { item: { item: [{ rule_name: '/Common/test-irule', priority: '0' }]}})
-        expect(server_api).to receive(:remove_rule).with(virtual_servers: { item: ['/Common/myvip']},
                                                     rules: { item: { item: [{ rule_name: '/Common/test-irule-2', priority: '0' }]}})
         expect(server_api).to receive(:add_rule).with(virtual_servers: { item: ['/Common/myvip']},
-                                                      rules: { item: { item: [{ rule_name: '/Common/test-irule-2', priority: '1' }]}})
+                                                      rules: { item: { item: [{ rule_name: '/Common/test-irule-2', priority: '2' }]}})
         chef_run
       end
     end
