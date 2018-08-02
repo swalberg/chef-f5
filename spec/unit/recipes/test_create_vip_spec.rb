@@ -1,6 +1,6 @@
 require 'spec_helper'
 require 'f5/icontrol'
-require_relative '../../../libraries/chef_f5'
+require_relative '../../../libraries/vip'
 require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
@@ -33,6 +33,7 @@ describe 'f5_test::test_create_vip' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
+    allow(server_api).to receive(:get_rule).and_return({item: {}})
   end
 
   context 'when managing the vip' do
@@ -58,7 +59,7 @@ describe 'f5_test::test_create_vip' do
       end
 
       it 'creates the vip' do
-        allow_any_instance_of(ChefF5::Client)
+        allow_any_instance_of(ChefF5::VIP)
           .to receive(:vip_default_pool).and_return('reallybasic')
 
         expect(server_api).to receive(:create)
@@ -73,8 +74,8 @@ describe 'f5_test::test_create_vip' do
       end
 
       it 'sets the pool' do
-        allow_any_instance_of(ChefF5::Client).to receive(:create_vip)
-        allow_any_instance_of(ChefF5::Client)
+        allow_any_instance_of(ChefF5::VIP).to receive(:create_vip)
+        allow_any_instance_of(ChefF5::VIP)
           .to receive(:vip_default_pool).and_return(nil)
 
         expect(server_api).to receive(:set_default_pool_name)
@@ -90,14 +91,14 @@ describe 'f5_test::test_create_vip' do
       end
 
       it 'does not create the vip' do
-        allow_any_instance_of(ChefF5::Client).to receive(:vip_default_pool)
-        allow_any_instance_of(ChefF5::Client).to receive(:set_vip_pool)
+        allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
+        allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
         chef_run
       end
 
       context 'and the desired pool is already set' do
         before do
-          allow_any_instance_of(ChefF5::Client)
+          allow_any_instance_of(ChefF5::VIP)
             .to receive(:vip_default_pool).and_return('reallybasic')
         end
 
@@ -109,13 +110,13 @@ describe 'f5_test::test_create_vip' do
 
       context 'and the desired pool is not set' do
         before do
-          allow_any_instance_of(ChefF5::Client)
+          allow_any_instance_of(ChefF5::VIP)
             .to receive(:vip_default_pool).and_return('somethingelse')
         end
 
         it 'sets the pool' do
-          allow_any_instance_of(ChefF5::Client).to receive(:create_vip)
-          allow_any_instance_of(ChefF5::Client)
+          allow_any_instance_of(ChefF5::VIP).to receive(:create_vip)
+          allow_any_instance_of(ChefF5::VIP)
             .to receive(:vip_default_pool).and_return(nil)
 
           expect(server_api).to receive(:set_default_pool_name).with(

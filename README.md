@@ -86,6 +86,16 @@ f5_vip 'myvip' do
   #                   :none disables the firewall_policy,
   #                   anything else is a named firewall_policy
   staged_firewall_policy
+  
+  # this is optional; If this VIP has IRules on the F5, this resource
+  #                   will remove them and insert exactly what is specified
+  #                   here. The attribute takes in an array of irules. The order 
+  #                   describes the priority of the irules.
+  #                   When changing priority of IRules, be aware that the F5
+  #                   doesn't provide an API for re-ordering associations therefore
+  #                   the re-ordered rules must be deleted then re-added in the correct
+  #                   order.
+  irules %w(test-irule test-irule-2)
 end
 
 # Create a F5 monitor template
