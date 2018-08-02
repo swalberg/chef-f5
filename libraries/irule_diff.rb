@@ -11,15 +11,11 @@ class IRuleDiff
       added = target_keys - current_keys
       removed = current_keys - target_keys
       changed = target.keys.select { |k| !current[k].nil? && target[k] != current[k] }
-      x = [added, changed, removed, target]
-      x
+      [added, changed, removed, target]
     end
 
     def diff(target, current_hash)
-      current_ordered = current_hash
-                          .to_a
-                          .sort{ |a, b| a[1] <=> b[1] }
-                          .map { |rule| rule.first }
+      current_ordered = current_hash.sort_by { |_, val| val }.map(&:first)
       return [[], [], [], {}] if target == current_ordered
       used_priorities = current_hash.values.map(&:to_i)
       min = used_priorities.min || 0
@@ -41,8 +37,7 @@ class IRuleDiff
 
     def next_priority(min, current_priority, used_priorities)
       i = min
-      while true
-        break if !used_priorities.include?(i) || current_priority == i
+      while used_priorities.include?(i) && current_priority != i
         i += 1
       end
       i
