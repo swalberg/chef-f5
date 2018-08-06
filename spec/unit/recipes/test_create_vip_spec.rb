@@ -40,7 +40,7 @@ describe 'f5_test::test_create_vip' do
     before do
       # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
-        { item: [[]] }
+        { item: { item: [] }}
       }
 
       # these vips have their SAT set to None

@@ -64,7 +64,7 @@ describe 'f5_test::test_create_vip_snat_pool_none' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
+          { item: { item: [] }}
         }
         allow(server_api).to receive(:add_profile)
       end
@@ -110,7 +110,7 @@ describe 'f5_test::test_create_vip_snat_pool_none' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
+          { item: { item: [] }}
         }
         allow(server_api).to receive(:add_profile)
       end

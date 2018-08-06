@@ -38,6 +38,10 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_none' do
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
     allow(server_api).to receive(:get_rule).and_return({item: {}})
+    # these vips have no profiles
+    allow(server_api).to receive(:get_profile) {
+      { item: { item: [] } }
+    }
   end
 
   context 'when managing a new vip' do

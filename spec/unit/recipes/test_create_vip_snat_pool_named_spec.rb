@@ -58,7 +58,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
     context 'and the client ssl profile is missing' do
       before do
         allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
+          { item: { item: [] }}
         }
 
         # must allow the server profile and sat to be set
@@ -81,7 +81,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
+          { item: { item: [] }}
         }
         allow(server_api).to receive(:add_profile)
       end
@@ -132,7 +132,7 @@ describe 'f5_test::test_create_vip_snat_pool_named' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: [[]] }
+          { item: { item: [] }}
         }
         allow(server_api).to receive(:add_profile)
       end
