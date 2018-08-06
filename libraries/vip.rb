@@ -66,6 +66,64 @@ module ChefF5
         @ProfileContextType::PROFILE_CONTEXT_TYPE_CLIENT.member)
     end
 
+    def has_any_http_profile?(vip)
+      has_type_of_profile?(vip,
+                   @ProfileType::PROFILE_TYPE_HTTP.member,
+                   @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
+      )
+    end
+
+    def has_http_profile?(vip, profile_name)
+      has_profile?(vip, profile_name,
+        @ProfileType::PROFILE_TYPE_HTTP.member,
+        @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member)
+    end
+
+    def set_http_profile(vip, profile_name, existing_profile = nil)
+      remove_http_profile(vip, existing_profile) if existing_profile
+      api.LocalLB.VirtualServer.add_profile(
+        virtual_servers: { item: [with_partition(vip)] },
+        profiles: { item: [ { item: [{
+            profile_context: @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member,
+            profile_name: with_partition(profile_name)
+          }]
+        }]})
+    end
+
+    def remove_http_profile(vip, profile_name)
+      api.LocalLB.VirtualServer.remove_profile(
+        virtual_servers: { item: [with_partition(vip)] },
+        profiles: { item: [ { item: [{
+            profile_context: @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member,
+            profile_name: with_partition(profile_name)
+          }]
+        }]
+      })
+    end
+
+    def has_type_of_profile?(vip, profile_type, profile_context)
+      response = api.LocalLB.VirtualServer.get_profile({
+          virtual_servers: { item: [with_partition(vip)] }
+        })
+
+      return false unless response.length > 0 &&
+                          response[:item].length > 0 &&
+                          response[:item][:item].length > 0
+      vip_profiles = response[:item][:item]
+
+      vip_profiles = [ vip_profiles ] if (vip_profiles.respond_to?(:has_key?))
+
+      current_profiles = vip_profiles.select do |p|
+        p[:profile_type] == profile_type &&
+          p[:profile_context] == profile_context
+      end
+      if current_profiles.empty?
+        nil
+      else
+        current_profiles.first[:profile_name]
+      end
+    end
+
     def has_profile?(vip, profile_name, profile_type, profile_context)
       response = api.LocalLB.VirtualServer.get_profile({
           virtual_servers: { item: [with_partition(vip)] }

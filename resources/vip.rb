@@ -12,6 +12,7 @@ property :snat_pool, [:manual, :none, :automap, String], default: :manual
 property :enforced_firewall_policy, [:manual, :none, String], default: :manual
 property :staged_firewall_policy, [:manual, :none, String], default: :manual
 property :irules, Array, default: []
+property :http_profile, [NilClass, String, Symbol], default: nil
 
 IPv4 = %r{^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$}
 
@@ -55,6 +56,20 @@ action :create do
       converge_by("Add server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'") do
         vip.add_server_ssl_profile(new_resource.name, new_resource.server_ssl_profile)
         Chef::Log.info("Added server ssl profile '#{new_resource.server_ssl_profile}' to '#{new_resource.name}'")
+      end
+    end
+  end
+
+  http_profile = new_resource.http_profile
+  existing_profile_name = vip.has_any_http_profile?(new_resource.name)
+  if http_profile
+    if http_profile == :none
+      converge_by("Removing HTTP profile #{existing_profile_name} from #{new_resource.name}") do
+        vip.remove_http_profile(new_resource.name, existing_profile_name)
+      end
+    elsif !vip.has_http_profile?(new_resource.name, http_profile)
+      converge_by "Set HTTP profile for #{new_resource.name} to #{http_profile}" do
+        vip.set_http_profile(new_resource.name, http_profile, existing_profile_name)
       end
     end
   end
