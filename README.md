@@ -98,8 +98,8 @@ f5_vip 'myvip' do
   irules %w(test-irule test-irule-2)
   
   # this is optional; Sets the http profile of the VIP. The default value is `nil`.
-  #                   When value is `nil` it not modify the http profile. Setting to 
-  #                   `:none` will remove the http profile. Otherwise
+  #                   When value is `nil` it will not modify the http profile. Setting  
+  #                   to `:none` will remove the http profile. Otherwise
   #                   it sets the http profile. Note, the HTTP Profile must already
   #                   exist on the f5.
   http_profile :none
