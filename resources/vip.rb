@@ -12,7 +12,7 @@ property :snat_pool, [:manual, :none, :automap, String], default: :manual
 property :enforced_firewall_policy, [:manual, :none, String], default: :manual
 property :staged_firewall_policy, [:manual, :none, String], default: :manual
 property :irules, Array, default: []
-property :http_profile, [NilClass, String], default: nil
+property :http_profile, [NilClass, String, Symbol], default: nil
 
 IPv4 = %r{^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$}
 
@@ -63,15 +63,13 @@ action :create do
   http_profile = new_resource.http_profile
   existing_profile_name = vip.has_any_http_profile?(new_resource.name)
   if http_profile
-    unless vip.has_http_profile?(new_resource.name, http_profile)
-      converge_by "Set HTTP profile for #{new_resource.name} to #{http_profile}" do
-        vip.set_http_profile(new_resource.name, http_profile, existing_profile_name)
-      end
-    end
-  else
-    if existing_profile_name
+    if http_profile == :none
       converge_by("Removing HTTP profile #{existing_profile_name} from #{new_resource.name}") do
         vip.remove_http_profile(new_resource.name, existing_profile_name)
+      end
+    elsif !vip.has_http_profile?(new_resource.name, http_profile)
+      converge_by "Set HTTP profile for #{new_resource.name} to #{http_profile}" do
+        vip.set_http_profile(new_resource.name, http_profile, existing_profile_name)
       end
     end
   end

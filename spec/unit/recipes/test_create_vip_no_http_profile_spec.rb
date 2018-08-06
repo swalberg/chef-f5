@@ -57,10 +57,11 @@ describe 'f5_test::test_create_vip_no_http_profile' do
         }
       end
 
-      it 'deletes the http profile' do
+      it 'does not change the profile' do
         allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
         allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
-        expect(server_api).to receive(:remove_profile).with(hash_including(profiles: {item: [{item: [hash_including(profile_name: '/Common/http')]}]}))
+        expect(server_api).not_to receive(:remove_profile)
+        expect(server_api).not_to receive(:add_profile)
         chef_run
       end
     end
