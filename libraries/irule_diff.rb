@@ -3,8 +3,6 @@ require 'set'
 # Diff 2 hashes to show the added, changed, and removed keys
 class IRuleDiff
   class << self
-    MAX_IRULES = 100
-
     def diff_hashes(target, current)
       target_keys = Set.new target.keys
       current_keys = Set.new current.keys
