@@ -242,6 +242,32 @@ NOTE: these matches verify only the presence (or absence via `expect(chef_run).t
 
 The matchers cannot be used to validate whether convergence of an  `f5_pool` or `f5_vip` resource took place.
 
+NOTE: Due to [this issue](https://github.com/chefspec/chefspec/issues/703) you can't test multiple calls to a resource in chefspec if the resource name is the same.
+All resources have an optional `<RESOURCE_NAME>_name` attribute that you can use to override the chef resource's name. E.g. 
+```ruby
+f5_pool 'pool_name_create' do 
+  pool_name 'pool_name'
+  monitor 'tcp'
+end
+
+f5_pool 'pool_name_add_node1' do 
+  pool_name 'pool_name'
+  host 'node1'
+  ip '1.2.3.4'
+  port 443
+end
+
+f5_pool 'pool_name_add_node2' do 
+  pool_name 'pool_name'
+  host 'node2'
+  ip '1.2.3.5'
+  port 443
+end
+```
+
+In the above example, if `pool_name` wasn't specified then the resource name would have to be `pool_name` for each call to `f5_pool`. This would work as expected in chef but chefspec would only register the
+last invocation of `f5_pool`. By using the `pool_name` resource the chef resource can be uniquely named and therefore tested.  
+
 ## Testing this cookbook
 
 Run `bundle exec rake test` to run the chefspec tests.
