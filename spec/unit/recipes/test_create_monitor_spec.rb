@@ -25,6 +25,21 @@ describe 'f5_test::test_create_monitor' do
       before do
         allow_any_instance_of(ChefF5::Monitor).to receive(:monitor_is_missing?).and_return(true)
         allow(f5_monitor).to receive(:create_template)
+        allow(f5_monitor).to receive(:get_template_string_property)
+                                 .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['STYPE_SEND']}))
+                                 .and_return({item: {value: 'GET /health HTTP/1.1\r\nHost: dontmatter\r\nConnection: Close\r\n\r\n'}})
+                                 .once
+          allow(f5_monitor).to receive(:get_template_string_property)
+                                 .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['STYPE_RECEIVE']}))
+                                 .and_return({item: {value: 'status.*DOWN' }})
+                                 .once
+
+          allow(f5_monitor).to receive(:get_template_destination)
+                               .with(hash_including(template_names: { item: ['/Common/test-monitor']}))
+                               .and_return({item: {
+                                 ipport: {address: '0.0.0.0', port: '0'},
+                                 address_type: 'ATYPE_STAR_ADDRESS_STAR_PORT'
+                               }})
       end
       it 'creates the monitor' do
         expect(f5_monitor).to receive(:create_template).with(hash_including(
@@ -43,6 +58,10 @@ describe 'f5_test::test_create_monitor' do
                                           is_directly_usable: true
                                         })]}
         ))
+        expect(f5_monitor).to receive(:set_template_string_property)
+                                  .with(hash_including(template_names: {item: ['/Common/test-monitor']},
+                                                       values: {item: [{type: 'STYPE_RECEIVE', value: 'status.*UP'}]}))
+
         chef_run
       end
     end

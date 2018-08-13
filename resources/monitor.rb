@@ -24,7 +24,6 @@ action :create do
     converge_by "Create monitor template #{actual_monitor_name}" do
       monitor.create_monitor(actual_monitor_name, **f5_attributes)
     end
-    return
   end
 
   changeable_attributes = {
