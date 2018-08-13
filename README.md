@@ -243,7 +243,8 @@ NOTE: these matches verify only the presence (or absence via `expect(chef_run).t
 The matchers cannot be used to validate whether convergence of an  `f5_pool` or `f5_vip` resource took place.
 
 NOTE: Due to [this issue](https://github.com/chefspec/chefspec/issues/703) you can't test multiple calls to a resource in chefspec if the resource name is the same.
-All resources have an optional `<RESOURCE_NAME>_name` attribute that you can use to override the chef resource's name. E.g. 
+All resources have an optional `<RESOURCE_NAME>_name` attribute that you can use to override the chef resource's name. E.g.   
+
 ```ruby
 f5_pool 'pool_name_create' do 
   pool_name 'pool_name'
