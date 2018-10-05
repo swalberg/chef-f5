@@ -23,6 +23,7 @@ describe 'f5_test::test_create_pool' do
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_lb_method_changed?).and_return(false)
     end
 
     context 'the pool does not exist' do
@@ -72,6 +73,7 @@ describe 'f5_test::test_create_pool' do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_lb_method_changed?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
     end
 
@@ -121,6 +123,7 @@ describe 'f5_test::test_create_pool' do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_lb_method_changed?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       expect(node).to receive(:get_list) {
@@ -146,6 +149,51 @@ describe 'f5_test::test_create_pool' do
       end
       it 'adds the monitor to the pool' do
         expect(pool).to receive(:set_monitor_association)
+        chef_run
+      end
+    end
+  end
+
+  context 'managing the lb_method' do
+    let (:pool) { double('F5.LocalLB.Pool') }
+
+    before do
+      allow(api).to receive_message_chain('LocalLB.Pool') { pool }
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
+      allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
+      allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
+      allow(pool).to receive(:get_lb_method)
+                         .with(pool_names: { item: ['/Common/reallybasic'] })
+                         .and_return(:item=>'LB_METHOD_ROUND_ROBIN', :'@s:type' => 'A:Array', :'@a:array_type' => 'iControl:LocalLB.LBMethod[1]')
+    end
+    context 'the lb_method is already set' do
+      it 'does not set the lb_method' do
+        expect(pool).to_not receive(:set_lb_method)
+        chef_run
+      end
+    end
+
+    context 'the lb_method is different' do
+      let (:pool) { double('F5.LocalLB.Pool') }
+
+      before do
+        allow(api).to receive_message_chain('LocalLB.Pool') { pool }
+        allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing?).and_return(false)
+        allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_node?).and_return(false)
+        allow_any_instance_of(ChefF5::Client).to receive(:node_is_enabled?).and_return(true)
+        allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
+        allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
+        allow(pool).to receive(:get_lb_method)
+                         .with(pool_names: { item: ['/Common/reallybasic'] })
+                         .and_return(:item=>'LB_METHOD_PREDICTIVE_MEMBER', :'@s:type' => 'A:Array', :'@a:array_type' => 'iControl:LocalLB.LBMethod[1]')
+      end
+
+      it 'sets the lb_method' do
+        expect(pool).to receive(:set_lb_method).with(pool_names: { item: ['/Common/reallybasic'] },
+                                                     lb_methods: { item: ['LB_METHOD_ROUND_ROBIN'] }
+        )
         chef_run
       end
     end

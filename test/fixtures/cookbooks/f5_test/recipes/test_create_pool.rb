@@ -3,4 +3,5 @@ f5_pool 'reallybasic' do
   host node['fqdn']
   port 80
   monitor 'test-monitor'
+  lb_method 'LB_METHOD_ROUND_ROBIN'
 end

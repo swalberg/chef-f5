@@ -1,6 +1,7 @@
 require_relative './base_client'
 module ChefF5
   class Client < BaseClient
+    LB_METHOD_TYPES = %w(LB_METHOD_ROUND_ROBIN LB_METHOD_RATIO_MEMBER LB_METHOD_LEAST_CONNECTION_MEMBER LB_METHOD_OBSERVED_MEMBER LB_METHOD_PREDICTIVE_MEMBER LB_METHOD_RATIO_NODE_ADDRESS LB_METHOD_LEAST_CONNECTION_NODE_ADDRESS LB_METHOD_FASTEST_NODE_ADDRESS LB_METHOD_OBSERVED_NODE_ADDRESS LB_METHOD_PREDICTIVE_NODE_ADDRESS LB_METHOD_DYNAMIC_RATIO LB_METHOD_FASTEST_APP_RESPONSE LB_METHOD_LEAST_SESSIONS LB_METHOD_DYNAMIC_RATIO_MEMBER LB_METHOD_L3_ADDR LB_METHOD_UNKNOWN LB_METHOD_WEIGHTED_LEAST_CONNECTION_MEMBER LB_METHOD_WEIGHTED_LEAST_CONNECTION_NODE_ADDRESS LB_METHOD_RATIO_SESSION LB_METHOD_RATIO_LEAST_CONNECTION_MEMBER LB_METHOD_RATIO_LEAST_CONNECTION_NODE_ADDRESS)
     def node_is_missing?(name)
       response = api.LocalLB.NodeAddressV2.get_list
 
@@ -81,6 +82,22 @@ module ChefF5
                                                    },
                                                  ],
                                                })
+    end
+
+    def pool_lb_method_changed?(pool, lb_method)
+      f5_lb_method = api.LocalLB.Pool.get_lb_method(pool_names: { item: [with_partition(pool)] })
+      f5_lb_method[:item] != lb_method
+    end
+
+    def pool_update_lb_method(pool, lb_method)
+      validate_lb_method(lb_method)
+      api.LocalLB.Pool.set_lb_method(pool_names: { item: [with_partition(pool)] },
+                                     lb_methods: { item: [lb_method] })
+    end
+
+    def validate_lb_method(lb_method)
+      msg = "Invalid lb_method value: #{lb_method}; valid values are #{LB_METHOD_TYPES.inspect}"
+      raise ArgumentError, msg unless LB_METHOD_TYPES.include? lb_method
     end
 
     def add_node(name, ip)
