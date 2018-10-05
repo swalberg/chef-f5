@@ -41,7 +41,11 @@ create_pool = proc do
   actual_pool_name = new_resource.pool_name || new_resource.name
   if @f5.pool_is_missing?(actual_pool_name)
     converge_by("Create pool #{actual_pool_name}") do
-      @f5.create_pool(actual_pool_name)
+      if new_resource.lb_method
+        @f5.create_pool(actual_pool_name, new_resource.lb_method)
+      else
+        @f5.create_pool(actual_pool_name)
+      end
     end
   end
 
@@ -57,6 +61,16 @@ create_pool = proc do
       end
     else
       Chef::Log.debug("#{actual_pool_name} already has monitor #{new_resource.monitor}")
+    end
+  end
+
+  if new_resource.lb_method
+    if @f5.pool_lb_method_changed?(actual_pool_name, new_resource.lb_method)
+      converge_by("Updating lb_method on pool #{actual_pool_name}") do
+        @f5.pool_update_lb_method(actual_pool_name, new_resource.lb_method)
+      end
+    else
+      Chef::Log.debug("#{actual_pool_name} has the correct lb_method.")
     end
   end
 end
