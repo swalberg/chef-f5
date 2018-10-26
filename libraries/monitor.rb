@@ -96,5 +96,35 @@ module ChefF5
         'ATYPE_UNSET'
       end
     end
+
+    def timeout_changed?(name, timeout)
+      current = api.LocalLB.Monitor.get_template_integer_property(
+        template_names: { item: [with_partition(name)] },
+        property_types: { item: ['ITYPE_TIMEOUT'] }
+      )
+      current[:item][:value].to_i != timeout
+    end
+
+    def update_timeout(name, timeout)
+      api.LocalLB.Monitor.set_template_integer_property(
+        template_names: { item: [with_partition(name)] },
+        values: { item: [{ type: 'ITYPE_TIMEOUT', value: timeout.to_s }] }
+      )
+    end
+
+    def interval_changed?(name, interval)
+      current = api.LocalLB.Monitor.get_template_integer_property(
+        template_names: { item: [with_partition(name)] },
+        property_names: { item: ['ITYPE_INTERVAL'] }
+      )
+      current[:item][:value].to_i != interval
+    end
+
+    def update_interval(name, interval)
+      api.LocalLB.Monitor.set_template_integer_property(
+        template_names: { item: [with_partition(name)] },
+        values: { item: [{ type: 'ITYPE_INTERVAL', value: interval.to_s }] }
+      )
+    end
   end
 end
