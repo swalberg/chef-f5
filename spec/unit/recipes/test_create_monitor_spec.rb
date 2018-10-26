@@ -24,6 +24,8 @@ describe 'f5_test::test_create_monitor' do
     context 'monitor does not exist' do
       before do
         allow_any_instance_of(ChefF5::Monitor).to receive(:monitor_is_missing?).and_return(true)
+        allow_any_instance_of(ChefF5::Monitor).to receive(:timeout_changed?).and_return(false)
+        allow_any_instance_of(ChefF5::Monitor).to receive(:interval_changed?).and_return(false)
         allow(f5_monitor).to receive(:create_template)
         allow(f5_monitor).to receive(:get_template_string_property)
                                  .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['STYPE_SEND']}))
@@ -80,6 +82,8 @@ describe 'f5_test::test_create_monitor' do
       end
       context 'and is the same' do
         before do
+          allow_any_instance_of(ChefF5::Monitor).to receive(:timeout_changed?).and_return(false)
+          allow_any_instance_of(ChefF5::Monitor).to receive(:interval_changed?).and_return(false)
           allow(f5_monitor).to receive(:get_template_string_property)
                                  .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['STYPE_SEND']}))
                                  .and_return({item: {value: 'GET /health HTTP/1.1\r\nHost: dontmatter\r\nConnection: Close\r\n\r\n'}})
@@ -97,6 +101,8 @@ describe 'f5_test::test_create_monitor' do
 
       context 'the string properties are different' do
         before do
+          allow_any_instance_of(ChefF5::Monitor).to receive(:timeout_changed?).and_return(false)
+          allow_any_instance_of(ChefF5::Monitor).to receive(:interval_changed?).and_return(false)
           allow(f5_monitor).to receive(:get_template_string_property)
                                  .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['STYPE_SEND']}))
                                  .and_return({item: {value: 'GET /health HTTP/1.1\r\nHost: dontmatter\r\nConnection: Close\r\n\r\n'}})
@@ -112,6 +118,23 @@ describe 'f5_test::test_create_monitor' do
           expect(f5_monitor).to receive(:set_template_string_property)
                                   .with(hash_including(template_names: {item: ['/Common/test-monitor']},
                                                        values: {item: [{type: 'STYPE_RECEIVE', value: 'status.*UP'}]}))
+          chef_run
+        end
+      end
+      context 'the timeout is different' do
+        before do
+          allow_any_instance_of(ChefF5::Monitor).to receive(:string_properties_match?).and_return([])
+          allow_any_instance_of(ChefF5::Monitor).to receive(:interval_changed?).and_return(false)
+          allow(f5_monitor).to receive(:get_template_integer_property)
+                                 .with(hash_including(template_names: { item: ['/Common/test-monitor']}, property_types: {item: ['ITYPE_TIMEOUT']}))
+                                 .and_return({item: {value: '5'}})
+                                 .once
+        end
+
+        it 'updates the timeout' do
+          expect(f5_monitor).to receive(:set_template_integer_property)
+                                  .with(hash_including(template_names: {item: ['/Common/test-monitor']},
+                                                       values: {item: [{type: 'ITYPE_TIMEOUT', value: '10'}]}))
           chef_run
         end
       end

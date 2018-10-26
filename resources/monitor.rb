@@ -43,6 +43,18 @@ action :create do
       monitor.update_string_properties(actual_monitor_name, mismatches, new_resource.string_properties)
     end
   end
+
+  if monitor.timeout_changed?(actual_monitor_name, new_resource.timeout)
+    converge_by 'Updating timeout' do
+      monitor.update_timeout(actual_monitor_name, new_resource.timeout)
+    end
+  end
+
+  if monitor.interval_changed?(actual_monitor_name, new_resource.interval)
+    converge_by 'Updating interval' do
+      monitor.update_interval(actual_monitor_name, new_resource.interval)
+    end
+  end
 end
 
 action :destroy do
