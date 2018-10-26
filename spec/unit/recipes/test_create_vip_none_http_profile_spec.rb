@@ -64,5 +64,22 @@ describe 'f5_test::test_create_vip_none_http_profile' do
         chef_run
       end
     end
+
+    context 'and the vip does not have an http profile' do
+      before do
+        allow(server_api).to receive(:get_list) {
+          { item: ['/Common/myvip'] }
+        }
+        allow(server_api).to receive(:get_profile) {
+          { item: { item: {} } }
+        }
+        allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
+        allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
+      end
+      it 'does not attempt to delete any http profile' do
+        expect(server_api).not_to receive(:remove_profile)
+        chef_run
+      end
+    end
   end
 end
