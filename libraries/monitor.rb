@@ -115,7 +115,7 @@ module ChefF5
     def interval_changed?(name, interval)
       current = api.LocalLB.Monitor.get_template_integer_property(
         template_names: { item: [with_partition(name)] },
-        property_names: { item: ['ITYPE_INTERVAL'] }
+        property_types: { item: ['ITYPE_INTERVAL'] }
       )
       current[:item][:value].to_i != interval
     end
