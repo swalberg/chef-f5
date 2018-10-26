@@ -68,7 +68,7 @@ action :create do
     if http_profile == :none
       converge_by("Removing HTTP profile #{existing_profile_name} from #{actual_vip_name}") do
         vip.remove_http_profile(actual_vip_name, existing_profile_name)
-      end
+      end if existing_profile_name
     elsif !vip.has_http_profile?(actual_vip_name, http_profile)
       converge_by "Set HTTP profile for #{actual_vip_name} to #{http_profile}" do
         vip.set_http_profile(actual_vip_name, http_profile, existing_profile_name)
