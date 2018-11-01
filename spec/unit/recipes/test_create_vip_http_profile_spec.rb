@@ -39,6 +39,9 @@ describe 'f5_test::test_create_vip_http_profile' do
     allow(server_api).to receive(:get_list) {
       { item: ['/Common/myvip'] }
     }
+    allow(server_api).to receive(:get_destination_v2) {
+      { item: { address: '86.75.30.9', port: '80' } }
+    }
   end
 
   context 'when managing the vip' do

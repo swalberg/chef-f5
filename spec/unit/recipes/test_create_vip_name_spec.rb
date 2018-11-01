@@ -35,6 +35,9 @@ describe 'f5_test::test_create_vip_name' do
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
     allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_destination_v2) {
+      { item: { address: '86.75.30.9', port: '80' } }
+    }
   end
 
   context 'when managing the vip' do
@@ -77,6 +80,9 @@ describe 'f5_test::test_create_vip_name' do
         allow_any_instance_of(DNSLookup)
           .to receive(:address).and_return('90.2.1.0')
 
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '90.2.1.0', port: '80' } }
+        }
         expect(server_api).to receive(:create) do |args|
           expect(args[:definitions][:item][:address]).to eq '90.2.1.0'
         end
@@ -96,6 +102,12 @@ describe 'f5_test::test_create_vip_name' do
       before do
         allow(server_api).to receive(:get_list) {
           { item: ['/Common/myvip'] }
+        }
+        allow_any_instance_of(DNSLookup)
+          .to receive(:address).and_return('90.2.1.0')
+
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '90.2.1.0', port: '80' } }
         }
       end
 
