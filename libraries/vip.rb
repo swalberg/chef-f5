@@ -53,6 +53,19 @@ module ChefF5
       )
     end
 
+    def address(vip)
+      res = api.LocalLB.VirtualServer.get_destination_v2(virtual_servers: { item: [with_partition(vip)] })
+      raise 'No Destination found' unless res && res[:item]
+      address = res[:item].is_a?(Array) ? res[:item].first : res[:item]
+      [strip_partition(address[:address]), address[:port]]
+    end
+
+    def update_address(vip, address, port)
+      port = '0' if port == '*'
+      api.LocalLB.VirtualServer.set_destination_v2(virtual_servers: { item: [with_partition(vip)] },
+                                                   destinations: { item: [{ address: address, port: port}]})
+    end
+
     def set_vip_pool(vip, pool)
       api.LocalLB.VirtualServer.set_default_pool_name(
         virtual_servers: { item: [with_partition(vip)] },

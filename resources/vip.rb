@@ -40,6 +40,14 @@ action :create do
     end
   end
 
+  old_address = vip.address(actual_vip_name)
+  port = new_resource.port == '*' ? '0' : new_resource.port.to_s
+  unless old_address == [ip, port]
+    converge_by "Updating VIP ip address from #{old_address} to #{ip}" do
+      vip.update_address(actual_vip_name, ip, new_resource.port)
+    end
+  end
+
   if vip.vip_default_pool(actual_vip_name) != new_resource.pool
     vip.set_vip_pool(actual_vip_name, new_resource.pool)
   end

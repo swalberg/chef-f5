@@ -43,75 +43,52 @@ describe 'f5_test::test_create_vip_all_ports' do
         { item: { item: [] }}
       }
 
-      allow(server_api).to receive(:get_destination_v2) {
-        { item: { address: '86.75.30.9', port: '80' } }
-      }
-
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
           { item: [
               F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
           ]}}
+      allow(server_api).to receive(:get_list) {
+        { item: ['/Common/myvip'] }
+      }
+      allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
+      allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
     end
 
-    context 'and the vip does not exist' do
+    context 'and the ip address has changed' do
       before do
-        allow(server_api).to receive(:get_list) {
-          { item: [] }
-        }
         allow(server_api).to receive(:get_destination_v2) {
-          { item: { address: '86.75.30.9', port: '0' } }
+          { item: { address: '86.75.30.10', port: '0' } }
         }
       end
-
-      it 'creates the vip with port 0 (i.e. any)' do
-        allow_any_instance_of(ChefF5::VIP)
-          .to receive(:vip_default_pool).and_return('reallybasic')
-
-        expect(server_api).to receive(:create).with(
-          definitions: {
-            item: {
-            name: '/Common/myvip',
-            address: '86.75.30.9',
-            port: '0',
-            protocol: 'PROTOCOL_TCP' },
-          },
-          wildmasks: { item: '255.255.255.255' },
-          resources: {
-            item: {
-              type: 'RESOURCE_TYPE_REJECT',
-              default_pool_name: '',
-            },
-          },
-          profiles: {
-            item: [
-              item: {
-                profile_context: 'PROFILE_CONTEXT_TYPE_ALL',
-                profile_name: 'http'
-              }
-            ]
-          }
-        )
-
-        expect(server_api).to receive(:set_type)
+      it 'updates the address' do
+        expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
+                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
+        chef_run
+      end
+    end
+    context 'and the port has changed' do
+      before do
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '86.75.30.9', port: '80' } }
+        }
+      end
+      it 'updates the address' do
+        expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
+                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
         chef_run
       end
     end
 
-    context 'and the vip already exists' do
+    context 'nothing has changed' do
       before do
-        allow(server_api).to receive(:get_list) {
-          { item: ['/Common/myvip'] }
-        }
         allow(server_api).to receive(:get_destination_v2) {
           { item: { address: '86.75.30.9', port: '0' } }
         }
       end
-
-      it 'does not create the vip' do
-        allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
-        allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
+      it 'does not update the address' do
+        expect(server_api).not_to receive(:set_destination_v2)
         chef_run
       end
     end

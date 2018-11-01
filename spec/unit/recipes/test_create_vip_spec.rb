@@ -43,6 +43,10 @@ describe 'f5_test::test_create_vip' do
         { item: { item: [] }}
       }
 
+      allow(server_api).to receive(:get_destination_v2) {
+        { item: { address: '86.75.30.9', port: '80' } }
+      }
+
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
