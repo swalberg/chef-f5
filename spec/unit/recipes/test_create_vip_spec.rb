@@ -34,6 +34,9 @@ describe 'f5_test::test_create_vip' do
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
     allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_destination_v2) {
+      { item: { address: '86.75.30.9', port: '80' } }
+    }
   end
 
   context 'when managing the vip' do
@@ -41,6 +44,10 @@ describe 'f5_test::test_create_vip' do
       # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
         { item: { item: [] }}
+      }
+
+      allow(server_api).to receive(:get_destination_v2) {
+        { item: { address: '86.75.30.9', port: '80' } }
       }
 
       # these vips have their SAT set to None

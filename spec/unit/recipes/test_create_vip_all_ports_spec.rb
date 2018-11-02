@@ -43,6 +43,10 @@ describe 'f5_test::test_create_vip_all_ports' do
         { item: { item: [] }}
       }
 
+      allow(server_api).to receive(:get_destination_v2) {
+        { item: { address: '86.75.30.9', port: '80' } }
+      }
+
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
@@ -55,6 +59,9 @@ describe 'f5_test::test_create_vip_all_ports' do
       before do
         allow(server_api).to receive(:get_list) {
           { item: [] }
+        }
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '86.75.30.9', port: '0' } }
         }
       end
 
@@ -96,6 +103,9 @@ describe 'f5_test::test_create_vip_all_ports' do
       before do
         allow(server_api).to receive(:get_list) {
           { item: ['/Common/myvip'] }
+        }
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '86.75.30.9', port: '0' } }
         }
       end
 

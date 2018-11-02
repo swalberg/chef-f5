@@ -1,5 +1,5 @@
 f5_vip 'myvip' do
-  address 'github.com'
+  address '192.30.253.112'
   port '80'
   protocol 'PROTOCOL_TCP'
   pool 'reallybasic'

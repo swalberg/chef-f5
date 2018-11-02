@@ -2,10 +2,9 @@ require 'spec_helper'
 require 'f5/icontrol'
 require_relative '../../../libraries/vip'
 require_relative '../../../libraries/credentials'
-require_relative '../../../libraries/dns_lookup'
 require_relative '../../../libraries/gem_helper'
 
-describe 'f5_test::test_create_vip_name' do
+describe 'f5_test::test_create_vip_all_ports' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
 
@@ -35,16 +34,13 @@ describe 'f5_test::test_create_vip_name' do
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
     allow(server_api).to receive(:get_rule).and_return({item: {}})
-    allow(server_api).to receive(:get_destination_v2) {
-      { item: { address: '86.75.30.9', port: '80' } }
-    }
   end
 
   context 'when managing the vip' do
     before do
       # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
-        { item: { item: [] } }
+        { item: { item: [] }}
       }
 
       # these vips have their SAT set to None
@@ -53,70 +49,48 @@ describe 'f5_test::test_create_vip_name' do
           { item: [
               F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
           ]}}
+      allow(server_api).to receive(:get_list) {
+        { item: ['/Common/myvip'] }
+      }
+      allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
+      allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
     end
 
-    context 'and the name hasnt been created yet' do
-      it 'skips all the work' do
-        allow_any_instance_of(DNSLookup)
-          .to receive(:address).and_return(nil)
-
-        expect(server_api).to_not receive(:create)
-
+    context 'and the ip address has changed' do
+      before do
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '86.75.30.10', port: '0' } }
+        }
+      end
+      it 'updates the address' do
+        expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
+                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
+        chef_run
+      end
+    end
+    context 'and the port has changed' do
+      before do
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '86.75.30.9', port: '80' } }
+        }
+      end
+      it 'updates the address' do
+        expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
+                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
         chef_run
       end
     end
 
-    context 'and the vip does not exist' do
+    context 'nothing has changed' do
       before do
-        allow(server_api).to receive(:get_list) {
-          { item: [] }
-        }
-      end
-
-      it 'creates the vip' do
-        allow_any_instance_of(ChefF5::VIP)
-          .to receive(:vip_default_pool).and_return('reallybasic')
-
-        allow_any_instance_of(DNSLookup)
-          .to receive(:address).and_return('90.2.1.0')
-
         allow(server_api).to receive(:get_destination_v2) {
-          { item: { address: '90.2.1.0', port: '80' } }
-        }
-        expect(server_api).to receive(:create) do |args|
-          expect(args[:definitions][:item][:address]).to eq '90.2.1.0'
-        end
-
-        expect(server_api).to receive(:set_type)
-
-        expect(chef_run).to create_f5_vip('myvip').with(
-          address: 'github.com',
-          port: '80',
-          protocol: 'PROTOCOL_TCP',
-          pool: 'reallybasic'
-        )
-      end
-    end
-
-    context 'and the vip already exists' do
-      before do
-        allow(server_api).to receive(:get_list) {
-          { item: ['/Common/myvip'] }
-        }
-        allow_any_instance_of(DNSLookup)
-          .to receive(:address).and_return('90.2.1.0')
-
-        allow(server_api).to receive(:get_destination_v2) {
-          { item: { address: '90.2.1.0', port: '80' } }
+          { item: { address: '86.75.30.9', port: '0' } }
         }
       end
-
-      it 'does not create the vip' do
-        allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
-        allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
+      it 'does not update the address' do
+        expect(server_api).not_to receive(:set_destination_v2)
         chef_run
       end
     end
   end
 end
-

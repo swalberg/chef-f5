@@ -34,6 +34,9 @@ describe 'f5_test::test_create_vip_irules' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
+    allow(server_api).to receive(:get_destination_v2) {
+      { item: { address: '192.30.253.112', port: '80' } }
+    }
   end
 
   context 'when managing the vip' do
@@ -75,6 +78,9 @@ describe 'f5_test::test_create_vip_irules' do
           .to receive(:vip_default_pool).and_return('reallybasic')
       end
       it 'deletes the extra IRule' do
+        allow(server_api).to receive(:get_destination_v2) {
+          { item: { address: '192.30.253.112', port: '80' } }
+        }
         expect(server_api).to receive(:remove_rule).with(virtual_servers: { item: ['/Common/myvip']},
                                                     rules: { item: { item: [{ rule_name: '/Common/test-irule-3', priority: '0' }]}})
         chef_run

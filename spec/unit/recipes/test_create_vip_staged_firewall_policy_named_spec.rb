@@ -42,6 +42,9 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_named' do
     allow(server_api).to receive(:get_profile) {
       { item: { item: [] } }
     }
+    allow(server_api).to receive(:get_destination_v2) {
+      { item: { address: '86.75.30.9', port: '80' } }
+    }
   end
 
   context 'when managing a new vip' do
