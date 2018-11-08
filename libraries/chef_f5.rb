@@ -84,6 +84,18 @@ module ChefF5
                                                })
     end
 
+    def pool_ratio_changed?(pool, ratio, address, port)
+      f5_ratio = api.LocalLB.Pool.get_member_ratio(pool_names: { item: [with_partition(pool)] },
+                                                              members: { item: { item: [{ address: address, port: port }]}})  # return long [] []
+      f5_ratio[:item][:item] != ratio.to_s
+    end
+
+    def pool_update_ratio(pool, ratio, address, port)
+      api.LocalLB.Pool.set_member_ratio(pool_names: { item: [with_partition(pool)] },
+                                      members: { item: { item: [{ address: address, port: port }]}},
+                                      ratios: { item: { item: [ratio]}})
+    end
+
     def pool_lb_method_changed?(pool, lb_method)
       f5_lb_method = api.LocalLB.Pool.get_lb_method(pool_names: { item: [with_partition(pool)] })
       f5_lb_method[:item] != lb_method

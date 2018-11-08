@@ -27,6 +27,7 @@ describe 'f5_test::test_create_pool_add_action' do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
+      allow(pool).to receive(:get_member_ratio).and_return({:item=>{:item=>"1", :"@a:array_type"=>"y:long[1]"}, :"@s:type"=>"A:Array", :"@a:array_type"=>"y:long[][1]"})
 
     end
 
@@ -64,6 +65,22 @@ describe 'f5_test::test_create_pool_add_action' do
       it 'does not set the node enabled status' do
         allow(node).to receive(:create)
         expect(node).to_not receive(:set_session_enabled_state)
+        chef_run
+      end
+    end
+
+    context 'when the pool member ratio has changed' do
+      before do
+        allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
+        allow(pool).to receive(:get_member_ratio) {
+          { :item => { :item => '2', :"@a:array_type" => 'y:long[1]' }, :"@s:type" => 'A:Array', :"@a:array_type" => 'y:long[][1]' }
+        }
+      end
+      it 'update the pool member ratio' do
+        expect(pool).to receive(:set_member_ratio).with(pool_names: { item: ['/Common/reallybasic'] },
+                                                    members: { item: { item: [{ address: 'fauxhai.local', port: 80 }]}},
+                                                    ratios: { item: { item: [1]}})
+
         chef_run
       end
     end

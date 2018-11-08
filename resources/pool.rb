@@ -4,6 +4,7 @@ property :ip, String, regex: /.*/
 property :port, [String, Integer], regex: /^(\*|\d+)$/
 property :monitor, String, regex: /.*/
 property :lb_method, String, regex: /^[A-Z_]+$/
+property :ratio, [NilClass, Integer], default: nil
 property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
@@ -33,6 +34,16 @@ create_node = proc do
       converge_by("Enabling '#{new_resource.host}' (was previously disabled)") do
         @f5.node_enable(new_resource.host)
       end
+    end
+  end
+
+  if new_resource.ratio
+    if @f5.pool_ratio_changed?(actual_pool_name, new_resource.ratio, new_resource.host, new_resource.port)
+      converge_by("Updating ratio on pool #{actual_pool_name}") do
+        @f5.pool_update_ratio(actual_pool_name, new_resource.ratio, new_resource.host, new_resource.port)
+      end
+    else
+      Chef::Log.debug("#{actual_pool_name} has the correct ratio.")
     end
   end
 end
