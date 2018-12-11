@@ -1,35 +1,61 @@
 require_relative './base_client'
 module ChefF5
   class Client < BaseClient
-    LB_METHOD_TYPES = %w(LB_METHOD_ROUND_ROBIN LB_METHOD_RATIO_MEMBER LB_METHOD_LEAST_CONNECTION_MEMBER LB_METHOD_OBSERVED_MEMBER LB_METHOD_PREDICTIVE_MEMBER LB_METHOD_RATIO_NODE_ADDRESS LB_METHOD_LEAST_CONNECTION_NODE_ADDRESS LB_METHOD_FASTEST_NODE_ADDRESS LB_METHOD_OBSERVED_NODE_ADDRESS LB_METHOD_PREDICTIVE_NODE_ADDRESS LB_METHOD_DYNAMIC_RATIO LB_METHOD_FASTEST_APP_RESPONSE LB_METHOD_LEAST_SESSIONS LB_METHOD_DYNAMIC_RATIO_MEMBER LB_METHOD_L3_ADDR LB_METHOD_UNKNOWN LB_METHOD_WEIGHTED_LEAST_CONNECTION_MEMBER LB_METHOD_WEIGHTED_LEAST_CONNECTION_NODE_ADDRESS LB_METHOD_RATIO_SESSION LB_METHOD_RATIO_LEAST_CONNECTION_MEMBER LB_METHOD_RATIO_LEAST_CONNECTION_NODE_ADDRESS)
+    unless defined? LB_METHOD_TYPES
+      LB_METHOD_TYPES = %w[
+        LB_METHOD_ROUND_ROBIN
+        LB_METHOD_RATIO_MEMBER
+        LB_METHOD_LEAST_CONNECTION_MEMBER
+        LB_METHOD_OBSERVED_MEMBER
+        LB_METHOD_PREDICTIVE_MEMBER
+        LB_METHOD_RATIO_NODE_ADDRESS
+        LB_METHOD_LEAST_CONNECTION_NODE_ADDRESS
+        LB_METHOD_FASTEST_NODE_ADDRESS
+        LB_METHOD_OBSERVED_NODE_ADDRESS
+        LB_METHOD_PREDICTIVE_NODE_ADDRESS
+        LB_METHOD_DYNAMIC_RATIO
+        LB_METHOD_FASTEST_APP_RESPONSE
+        LB_METHOD_LEAST_SESSIONS
+        LB_METHOD_DYNAMIC_RATIO_MEMBER
+        LB_METHOD_L3_ADDR
+        LB_METHOD_UNKNOWN
+        LB_METHOD_WEIGHTED_LEAST_CONNECTION_MEMBER
+        LB_METHOD_WEIGHTED_LEAST_CONNECTION_NODE_ADDRESS
+        LB_METHOD_RATIO_SESSION
+        LB_METHOD_RATIO_LEAST_CONNECTION_MEMBER
+        LB_METHOD_RATIO_LEAST_CONNECTION_NODE_ADDRESS
+      ].freeze
+    end
+
     def node_is_missing?(name)
       response = api.LocalLB.NodeAddressV2.get_list
 
       return true if response[:item].nil?
+
       Array(response[:item]).grep(/#{with_partition name}/).empty?
     end
 
     def node_is_enabled?(name)
-      response = api.LocalLB.NodeAddressV2.get_object_status({
+      response = api.LocalLB.NodeAddressV2.get_object_status(
         nodes: { item: [with_partition(name)] }
-      })
+      )
 
       response[:item][:enabled_status] ==
         @EnabledStatus::ENABLED_STATUS_ENABLED.member
     end
 
     def node_disable(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+      api.LocalLB.NodeAddressV2.set_session_enabled_state(
         nodes: { item: [with_partition(name)] },
         states: { item: [@EnabledState::STATE_DISABLED] }
-      })
+      )
     end
 
     def node_enable(name)
-      api.LocalLB.NodeAddressV2.set_session_enabled_state({
+      api.LocalLB.NodeAddressV2.set_session_enabled_state(
         nodes: { item: [with_partition(name)] },
         states: { item: [@EnabledState::STATE_ENABLED] }
-      })
+      )
     end
 
     def pool_is_missing?(name)
@@ -55,8 +81,7 @@ module ChefF5
 
     def pool_is_missing_monitor?(pool, monitor)
       monitors = api.LocalLB.Pool.get_monitor_association(pool_names:
-        { item: with_partition(pool) }
-                                                         )[:item]
+        { item: with_partition(pool) })[:item]
 
       monitors = [monitors] if monitors.is_a? Hash
       monitors.select do |mon|
@@ -71,29 +96,28 @@ module ChefF5
                                                    { pool_name: pool,
                                                      monitor_rule: {
                                                        monitor_templates: {
-                                                         item: monitor,
+                                                         item: monitor
                                                        },
                                                        quorum: '0',
                                                        # this value is overridden if an array of monitors
                                                        # are passed in. Instead it is set to
                                                        # `MONITOR_RULE_TYPE_AND_LIST`
-                                                       type: 'MONITOR_RULE_TYPE_SINGLE',
-                                                     },
-                                                   },
-                                                 ],
+                                                       type: 'MONITOR_RULE_TYPE_SINGLE'
+                                                     } }
+                                                 ]
                                                })
     end
 
     def pool_ratio_changed?(pool, ratio, address, port)
       f5_ratio = api.LocalLB.Pool.get_member_ratio(pool_names: { item: [with_partition(pool)] },
-                                                              members: { item: { item: [{ address: address, port: port }]}})  # return long [] []
+                                                   members: { item: { item: [{ address: address, port: port }] } }) # return long [] []
       f5_ratio[:item][:item] != ratio.to_s
     end
 
     def pool_update_ratio(pool, ratio, address, port)
       api.LocalLB.Pool.set_member_ratio(pool_names: { item: [with_partition(pool)] },
-                                      members: { item: { item: [{ address: address, port: port }]}},
-                                      ratios: { item: { item: [ratio]}})
+                                        members: { item: { item: [{ address: address, port: port }] } },
+                                        ratios: { item: { item: [ratio] } })
     end
 
     def pool_lb_method_changed?(pool, lb_method)
@@ -116,7 +140,8 @@ module ChefF5
       api.LocalLB.NodeAddressV2.create(
         nodes: { item: [with_partition(name)] },
         addresses: { item: [ip] },
-        limits: { item: [0] })
+        limits: { item: [0] }
+      )
     end
 
     def create_pool(name, lb_method = 'LB_METHOD_ROUND_ROBIN')
@@ -132,8 +157,8 @@ module ChefF5
 
       api.LocalLB.Pool.add_member_v2(
         pool_names: { item: [with_partition(pool)] },
-        members: { item: { item: [{ address: with_partition(node), port: port.to_s }] },
-      })
+        members: { item: { item: [{ address: with_partition(node), port: port.to_s }] } }
+      )
     end
   end
 end
