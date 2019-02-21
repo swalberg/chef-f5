@@ -35,9 +35,7 @@ class IRuleDiff
 
     def next_priority(min, current_priority, used_priorities)
       i = min
-      while used_priorities.include?(i) && current_priority != i
-        i += 1
-      end
+      i += 1 while used_priorities.include?(i) && current_priority != i
       i
     end
   end

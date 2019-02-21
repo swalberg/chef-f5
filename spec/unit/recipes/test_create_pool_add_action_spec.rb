@@ -7,9 +7,9 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_pool_add_action' do
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) {
+  let(:chef_run) do
     ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
-  }
+  end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
@@ -27,14 +27,14 @@ describe 'f5_test::test_create_pool_add_action' do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
-      allow(pool).to receive(:get_member_ratio).and_return({:item=>{:item=>"1", :"@a:array_type"=>"y:long[1]"}, :"@s:type"=>"A:Array", :"@a:array_type"=>"y:long[][1]"})
-
+      allow(pool).to receive(:get_member_ratio).and_return(item: { item: '1', "@a:array_type": 'y:long[1]' }, "@s:type": 'A:Array', "@a:array_type": 'y:long[][1]')
+      allow(api).to receive_message_chain('System.Session.set_active_folder')
     end
 
     context 'the node exists' do
       before do
         expect(node).to receive(:get_list) {
-          { :item => ['/Common/fauxhai.local', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/fauxhai.local', '/Common/two'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -53,7 +53,7 @@ describe 'f5_test::test_create_pool_add_action' do
     context 'the node does not exist' do
       before do
         expect(node).to receive(:get_list) {
-          { :item => ['/Common/a', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/a', '/Common/two'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -73,13 +73,13 @@ describe 'f5_test::test_create_pool_add_action' do
       before do
         allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
         allow(pool).to receive(:get_member_ratio) {
-          { :item => { :item => '2', :"@a:array_type" => 'y:long[1]' }, :"@s:type" => 'A:Array', :"@a:array_type" => 'y:long[][1]' }
+          { item: { item: '2', "@a:array_type": 'y:long[1]' }, "@s:type": 'A:Array', "@a:array_type": 'y:long[][1]' }
         }
       end
       it 'update the pool member ratio' do
         expect(pool).to receive(:set_member_ratio).with(pool_names: { item: ['/Common/reallybasic'] },
-                                                    members: { item: { item: [{ address: 'fauxhai.local', port: 80 }]}},
-                                                    ratios: { item: { item: [1]}})
+                                                        members: { item: { item: [{ address: 'fauxhai.local', port: 80 }] } },
+                                                        ratios: { item: { item: [1] } })
 
         chef_run
       end

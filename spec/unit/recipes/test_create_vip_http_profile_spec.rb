@@ -17,14 +17,14 @@ describe 'f5_test::test_create_vip_http_profile' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -33,7 +33,7 @@ describe 'f5_test::test_create_vip_http_profile' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     allow_any_instance_of(ChefF5::VIP).to receive(:vip_default_pool)
     allow_any_instance_of(ChefF5::VIP).to receive(:set_vip_pool)
     allow(server_api).to receive(:get_list) {
@@ -49,24 +49,25 @@ describe 'f5_test::test_create_vip_http_profile' do
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
-          { item: [
-            F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-          ]}}
+              { item: [
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE,
+              ] }
+            }
     end
 
     context 'and the http profile does not exist' do
       before do
         allow(server_api).to receive(:get_profile) {
-          { item: { item: { }}}
+          { item: { item: {} } }
         }
       end
 
       it 'sets the http profile' do
         expect(server_api).to receive(:add_profile).with(
-          hash_including(profiles: {item: [{item: [
-            hash_including(profile_name: '/Common/http',
-                           profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
-            )]}]}))
+          hash_including(profiles: { item: [{ item: [
+                           hash_including(profile_name: '/Common/http',
+                                          profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
+                                         )] }] }))
         chef_run
       end
     end
@@ -74,7 +75,7 @@ describe 'f5_test::test_create_vip_http_profile' do
     context 'and the http profile is correct' do
       before do
         allow(server_api).to receive(:get_profile) {
-          { item: { item: {profile_type: 'PROFILE_TYPE_HTTP', profile_context: 'PROFILE_CONTEXT_TYPE_ALL', profile_name: '/Common/http'} }}
+          { item: { item: { profile_type: 'PROFILE_TYPE_HTTP', profile_context: 'PROFILE_CONTEXT_TYPE_ALL', profile_name: '/Common/http' } } }
         }
       end
 
@@ -88,16 +89,16 @@ describe 'f5_test::test_create_vip_http_profile' do
     context 'and the http profile is different' do
       before do
         allow(server_api).to receive(:get_profile) {
-          { item: { item: {profile_type: 'PROFILE_TYPE_HTTP', profile_context: 'PROFILE_CONTEXT_TYPE_ALL', profile_name: '/Common/http-access'} }}
+          { item: { item: { profile_type: 'PROFILE_TYPE_HTTP', profile_context: 'PROFILE_CONTEXT_TYPE_ALL', profile_name: '/Common/http-access' } } }
         }
       end
       it 'sets the correct profile' do
-        expect(server_api).to receive(:remove_profile).with(hash_including(profiles: {item: [{item: [hash_including(profile_name: '/Common/http-access')]}]}))
+        expect(server_api).to receive(:remove_profile).with(hash_including(profiles: { item: [{ item: [hash_including(profile_name: '/Common/http-access')] }] }))
         expect(server_api).to receive(:add_profile).with(
-          hash_including(profiles: {item: [{item: [
-            hash_including(profile_name: '/Common/http',
-                           profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
-            )]}]}))
+          hash_including(profiles: { item: [{ item: [
+                           hash_including(profile_name: '/Common/http',
+                                          profile_context: F5::Icontrol::LocalLB::ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
+                                         )] }] }))
         chef_run
       end
     end

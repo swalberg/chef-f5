@@ -18,14 +18,14 @@ describe 'f5_test::test_create_vip_name' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -34,7 +34,7 @@ describe 'f5_test::test_create_vip_name' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     allow(server_api).to receive(:get_destination_v2) {
       { item: { address: '86.75.30.9', port: '80' } }
     }
@@ -50,9 +50,10 @@ describe 'f5_test::test_create_vip_name' do
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-          ]}}
+              { item: [
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE,
+              ] }
+            }
     end
 
     context 'and the name hasnt been created yet' do
@@ -119,4 +120,3 @@ describe 'f5_test::test_create_vip_name' do
     end
   end
 end
-

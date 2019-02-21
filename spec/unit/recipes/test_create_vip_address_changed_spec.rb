@@ -17,14 +17,14 @@ describe 'f5_test::test_create_vip_all_ports' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -33,22 +33,23 @@ describe 'f5_test::test_create_vip_all_ports' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
   end
 
   context 'when managing the vip' do
     before do
       # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
-        { item: { item: [] }}
+        { item: { item: [] } }
       }
 
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-          ]}}
+              { item: [
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE,
+              ] }
+            }
       allow(server_api).to receive(:get_list) {
         { item: ['/Common/myvip'] }
       }
@@ -64,7 +65,7 @@ describe 'f5_test::test_create_vip_all_ports' do
       end
       it 'updates the address' do
         expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
-                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
+                                                                destinations: { item: [{ address: '86.75.30.9', port: '0' }] })
         chef_run
       end
     end
@@ -76,7 +77,7 @@ describe 'f5_test::test_create_vip_all_ports' do
       end
       it 'updates the address' do
         expect(server_api).to receive(:set_destination_v2).with(virtual_servers: { item: ['/Common/myvip'] },
-                                                                destinations: { item: [{address: '86.75.30.9', port: '0'}]})
+                                                                destinations: { item: [{ address: '86.75.30.9', port: '0' }] })
         chef_run
       end
     end

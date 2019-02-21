@@ -1,6 +1,4 @@
 require 'singleton'
-require 'thread'
-
 module ChefF5
   class Autoload
     include Singleton

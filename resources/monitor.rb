@@ -1,4 +1,3 @@
-property :name, String
 property :monitor_name, [NilClass, String], default: nil
 property :template_type, String, regex: /TTYPE_UNSET|TTYPE_ICMP|TTYPE_TCP|TTYPE_TCP_ECHO|TTYPE_EXTERNAL|TTYPE_HTTP|TTYPE_HTTPS|TTYPE_NNTP|TTYPE_FTP|TTYPE_POP3|TTYPE_SMTP|TTYPE_MSSQL|TTYPE_GATEWAY|TTYPE_IMAP|TTYPE_RADIUS|TTYPE_LDAP|TTYPE_WMI|TTYPE_SNMP_DCA|TTYPE_SNMP_DCA_BASE|TTYPE_REAL_SERVER|TTYPE_UDP|TTYPE_NONE|TTYPE_ORACLE|TTYPE_SOAP|TTYPE_GATEWAY_ICMP|TTYPE_SIP|TTYPE_TCP_HALF_OPEN|TTYPE_SCRIPTED|TTYPE_WAP|TTYPE_RPC|TTYPE_SMB|TTYPE_SASP|TTYPE_MODULE_SCORE|TTYPE_FIREPASS|TTYPE_INBAND|TTYPE_RADIUS_ACCOUNTING|TTYPE_DIAMETER|TTYPE_VIRTUAL_LOCATION|TTYPE_MYSQL|TTYPE_POSTGRESQL/
 property :parent_template, String
@@ -13,13 +12,12 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
-
-
+property :partition, String, default: 'Common'
 
 action :create do
   load_f5_gem
   actual_monitor_name = new_resource.monitor_name || new_resource.name
-  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer)
+  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   if monitor.monitor_is_missing?(actual_monitor_name)
     converge_by "Create monitor template #{actual_monitor_name}" do
       monitor.create_monitor(actual_monitor_name, **f5_attributes)
@@ -28,7 +26,7 @@ action :create do
 
   changeable_attributes = {
     dest_ip: new_resource.dest_ip,
-    dest_port: new_resource.dest_port
+    dest_port: new_resource.dest_port,
   }
   if monitor.common_attributes_changed?(actual_monitor_name, **changeable_attributes)
     converge_by "Update common attributes on monitor template #{actual_monitor_name}" do
@@ -60,7 +58,7 @@ end
 action :destroy do
   load_f5_gem
   actual_monitor_name = new_resource.monitor_name || new_resource.name
-  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer)
+  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   unless monitor.monitor_is_missing?(actual_monitor_name)
     converge_by "Deleting monitor template #{actual_monitor_name}" do
       monitor.delete_monitor(actual_monitor_name)
@@ -79,7 +77,7 @@ action_class do
       dest_ip: new_resource.dest_ip,
       dest_port: new_resource.dest_port,
       is_read_only: new_resource.read_only,
-      is_directly_usable: new_resource.directly_usable
+      is_directly_usable: new_resource.directly_usable,
     }
   end
 end

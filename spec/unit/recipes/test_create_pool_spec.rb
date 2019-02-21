@@ -7,12 +7,13 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_pool' do
   let(:api) { double('F5::Icontrol') }
 
-  let(:chef_run) {
+  let(:chef_run) do
     ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
-  }
+  end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow_any_instance_of(Chef::RunContext::CookbookCompiler).to receive(:compile_libraries).and_return(true)
     stub_data_bag_item('f5', 'default').and_return(host: '1.2.3.4', username: 'api', password: 'testing')
   end
@@ -29,7 +30,7 @@ describe 'f5_test::test_create_pool' do
     context 'the pool does not exist' do
       before do
         allow(api).to receive_message_chain('LocalLB.Pool.get_list') {
-          { :item => ['/Common/test1', '/Common/mchan01'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/test1', '/Common/mchan01'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -51,7 +52,7 @@ describe 'f5_test::test_create_pool' do
       before do
         allow(api).to receive_message_chain('LocalLB.Pool') { pool }
         allow(pool).to receive(:get_list) {
-          { :item => ['/Common/reallybasic', '/Common/mchan01'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/reallybasic', '/Common/mchan01'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -80,7 +81,7 @@ describe 'f5_test::test_create_pool' do
     context 'the node exists' do
       before do
         expect(node).to receive(:get_list) {
-          { :item => ['/Common/fauxhai.local', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/fauxhai.local', '/Common/two'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -98,7 +99,7 @@ describe 'f5_test::test_create_pool' do
     context 'the node does not exist' do
       before do
         expect(node).to receive(:get_list) {
-          { :item => ['/Common/a', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+          { item: ['/Common/a', '/Common/two'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
         }
       end
 
@@ -127,10 +128,10 @@ describe 'f5_test::test_create_pool' do
       allow(api).to receive_message_chain('LocalLB.Pool') { pool }
       allow(api).to receive_message_chain('LocalLB.NodeAddressV2') { node }
       expect(node).to receive(:get_list) {
-        { :item => ['/Common/fauxhai.local', '/Common/two'], :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[2]' }
+        { item: ['/Common/fauxhai.local', '/Common/two'], "@s:type": 'A:Array', "@a:array_type": 'y:string[2]' }
       }
       allow(pool).to receive(:get_monitor_association) {
-        { :item => { pool_name: '/Common/reallybasic', monitor_rule: { :type => 'MONITOR_RULE_TYPE_SINGLE', :quorum => '0', :monitor_templates => { :item => '/Common/test-monitor', :"@s:type" => 'A:Array', :"@a:array_type" => 'y:string[1]' }, :"@s:type" => 'iControl:LocalLB.MonitorRule' } }, :"@s:type" => 'A:Array', :"@a:array_type" => 'iControl:LocalLB.Pool.MonitorAssociation[1]' }
+        { item: { pool_name: '/Common/reallybasic', monitor_rule: { type: 'MONITOR_RULE_TYPE_SINGLE', quorum: '0', monitor_templates: { item: '/Common/test-monitor', "@s:type": 'A:Array', "@a:array_type": 'y:string[1]' }, "@s:type": 'iControl:LocalLB.MonitorRule' } }, "@s:type": 'A:Array', "@a:array_type": 'iControl:LocalLB.Pool.MonitorAssociation[1]' }
       }
     end
     context 'the monitor is already on assigned to the pool' do
@@ -165,8 +166,8 @@ describe 'f5_test::test_create_pool' do
       allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
       allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
       allow(pool).to receive(:get_lb_method)
-                         .with(pool_names: { item: ['/Common/reallybasic'] })
-                         .and_return(:item=>'LB_METHOD_ROUND_ROBIN', :'@s:type' => 'A:Array', :'@a:array_type' => 'iControl:LocalLB.LBMethod[1]')
+        .with(pool_names: { item: ['/Common/reallybasic'] })
+        .and_return(item: 'LB_METHOD_ROUND_ROBIN', '@s:type': 'A:Array', '@a:array_type': 'iControl:LocalLB.LBMethod[1]')
     end
     context 'the lb_method is already set' do
       it 'does not set the lb_method' do
@@ -186,14 +187,14 @@ describe 'f5_test::test_create_pool' do
         allow_any_instance_of(ChefF5::Client).to receive(:pool_is_missing_monitor?).and_return(false)
         allow_any_instance_of(ChefF5::Client).to receive(:node_is_missing?).and_return(false)
         allow(pool).to receive(:get_lb_method)
-                         .with(pool_names: { item: ['/Common/reallybasic'] })
-                         .and_return(:item=>'LB_METHOD_PREDICTIVE_MEMBER', :'@s:type' => 'A:Array', :'@a:array_type' => 'iControl:LocalLB.LBMethod[1]')
+          .with(pool_names: { item: ['/Common/reallybasic'] })
+          .and_return(item: 'LB_METHOD_PREDICTIVE_MEMBER', '@s:type': 'A:Array', '@a:array_type': 'iControl:LocalLB.LBMethod[1]')
       end
 
       it 'sets the lb_method' do
         expect(pool).to receive(:set_lb_method).with(pool_names: { item: ['/Common/reallybasic'] },
                                                      lb_methods: { item: ['LB_METHOD_ROUND_ROBIN'] }
-        )
+                                                    )
         chef_run
       end
     end

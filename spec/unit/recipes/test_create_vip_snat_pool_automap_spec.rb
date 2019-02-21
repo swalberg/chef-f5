@@ -8,9 +8,9 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_vip_snat_pool_automap' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
-  let(:sat_type) {
+  let(:sat_type) do
     F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType
-  }
+  end
 
   let(:chef_run) do
     ChefSpec::SoloRunner.new(
@@ -21,14 +21,14 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -37,7 +37,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     allow(server_api).to receive(:get_destination_v2) {
       { item: { address: '86.75.30.9', port: '80' } }
     }
@@ -62,12 +62,12 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
       before do
         allow(server_api)
           .to receive(:get_source_address_translation_type) {
-            { item: sat_type::SRC_TRANS_NONE.member }
-        }
+                { item: sat_type::SRC_TRANS_NONE.member }
+              }
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: { item: [] }}
+          { item: { item: [] } }
         }
         allow(server_api).to receive(:add_profile)
       end
@@ -113,7 +113,7 @@ describe 'f5_test::test_create_vip_snat_pool_automap' do
 
         # must allow the client profile to be set
         allow(server_api).to receive(:get_profile) {
-          { item: { item: [] }}
+          { item: { item: [] } }
         }
         allow(server_api).to receive(:add_profile)
       end

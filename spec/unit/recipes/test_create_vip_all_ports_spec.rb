@@ -17,14 +17,14 @@ describe 'f5_test::test_create_vip_all_ports' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -33,14 +33,14 @@ describe 'f5_test::test_create_vip_all_ports' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
   end
 
   context 'when managing the vip' do
     before do
       # these vips have no profiles
       allow(server_api).to receive(:get_profile) {
-        { item: { item: [] }}
+        { item: { item: [] } }
       }
 
       allow(server_api).to receive(:get_destination_v2) {
@@ -50,9 +50,10 @@ describe 'f5_test::test_create_vip_all_ports' do
       # these vips have their SAT set to None
       allow(server_api)
         .to receive(:get_source_address_translation_type) {
-          { item: [
-              F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE
-          ]}}
+              { item: [
+                F5::Icontrol::LocalLB::VirtualServer::SourceAddressTranslationType::SRC_TRANS_NONE,
+              ] }
+            }
     end
 
     context 'and the vip does not exist' do
@@ -72,10 +73,10 @@ describe 'f5_test::test_create_vip_all_ports' do
         expect(server_api).to receive(:create).with(
           definitions: {
             item: {
-            name: '/Common/myvip',
-            address: '86.75.30.9',
-            port: '0',
-            protocol: 'PROTOCOL_TCP' },
+              name: '/Common/myvip',
+              address: '86.75.30.9',
+              port: '0',
+              protocol: 'PROTOCOL_TCP' },
           },
           wildmasks: { item: '255.255.255.255' },
           resources: {
@@ -88,9 +89,9 @@ describe 'f5_test::test_create_vip_all_ports' do
             item: [
               item: {
                 profile_context: 'PROFILE_CONTEXT_TYPE_ALL',
-                profile_name: 'http'
-              }
-            ]
+                profile_name: 'http',
+              },
+            ],
           }
         )
 

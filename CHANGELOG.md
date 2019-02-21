@@ -1,3 +1,5 @@
+# 0.4.13
+Add handling the api_path to properly manage partitions.
 # 0.2.2
 Bugfix for the last version
 
