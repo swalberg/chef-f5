@@ -13,13 +13,14 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :partition, String, default: '/Common/'
 
 
 
 action :create do
   load_f5_gem
   actual_monitor_name = new_resource.monitor_name || new_resource.name
-  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer)
+  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   if monitor.monitor_is_missing?(actual_monitor_name)
     converge_by "Create monitor template #{actual_monitor_name}" do
       monitor.create_monitor(actual_monitor_name, **f5_attributes)
@@ -60,7 +61,7 @@ end
 action :destroy do
   load_f5_gem
   actual_monitor_name = new_resource.monitor_name || new_resource.name
-  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer)
+  monitor = ChefF5::Monitor.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   unless monitor.monitor_is_missing?(actual_monitor_name)
     converge_by "Deleting monitor template #{actual_monitor_name}" do
       monitor.delete_monitor(actual_monitor_name)

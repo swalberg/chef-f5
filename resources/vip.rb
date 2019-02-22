@@ -7,6 +7,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :partition, String, default: '/Common/'
 property :client_ssl_profile, String
 property :server_ssl_profile, String
 property :snat_pool, [:manual, :none, :automap, String], default: :manual
@@ -28,7 +29,7 @@ end
 action :create do
   load_f5_gem
   actual_vip_name = new_resource.vip_name || new_resource.name
-  vip = ChefF5::VIP.new(node, new_resource, new_resource.load_balancer)
+  vip = ChefF5::VIP.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   ip = resolve_ip(new_resource.address)
 
   next if ip.nil?

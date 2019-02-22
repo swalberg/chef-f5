@@ -9,6 +9,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :partition, String, default: '/Common/'
 property :enabled_status, [:manual, :enabled, :disabled], default: node['f5']['enabled_status']
 
 create_node = proc do
@@ -88,7 +89,7 @@ end
 
 action :create do
   load_f5_gem
-  @f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer)
+  @f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
 
   instance_eval(&create_pool)
 
@@ -97,7 +98,7 @@ end
 
 action :add do
   load_f5_gem
-  @f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer)
+  @f5 = ChefF5::Client.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
 
   instance_eval(&create_node)
 end

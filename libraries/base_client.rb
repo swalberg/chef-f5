@@ -1,10 +1,11 @@
 module ChefF5
   class BaseClient
 
-    def initialize(node, resource, load_balancer)
+    def initialize(node, resource, load_balancer, partition)
       @node = node
       @resource = resource
       @load_balancer = load_balancer
+      @partition = partition
 
       # local module aliases reduce repetetive call chains
       @ProfileContextType = F5::Icontrol::LocalLB::ProfileContextType
@@ -23,7 +24,7 @@ module ChefF5
       if key =~ %r{^/} || key.to_s.empty?
         key
       else
-        "/Common/#{key}"
+        "/#{@partition}/#{key}"
       end
     end
 
@@ -37,6 +38,8 @@ module ChefF5
           password: credentials[:password]
         )
       end
+      @api.System.Session.set_active_folder(folder: "/#{@partition}")
+      @api
     end
   end
 end

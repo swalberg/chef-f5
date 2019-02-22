@@ -59,6 +59,7 @@ module ChefF5
     end
 
     def pool_is_missing?(name)
+      Chef::Log.warn "Folder is: #{api.System.Session.get_active_folder}"
       response = api.LocalLB.Pool.get_list
 
       return true if response[:item].nil?

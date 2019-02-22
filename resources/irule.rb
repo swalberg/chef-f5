@@ -5,11 +5,12 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :partition, String, default: '/Common/'
 
 action :create do
   load_f5_gem
   actual_irule_name = new_resource.irule_name || new_resource.name
-  irule = ChefF5::IRule.new(node, new_resource, new_resource.load_balancer)
+  irule = ChefF5::IRule.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
 
   if irule.is_missing?(actual_irule_name)
     converge_by "Create IRule #{actual_irule_name}" do
@@ -27,7 +28,7 @@ end
 
 action :destroy do
   actual_irule_name = new_resource.irule_name || new_resource.name
-  irule = ChefF5::IRule.new(node, new_resource, new_resource.load_balancer)
+  irule = ChefF5::IRule.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
 
   unless irule.is_missing?(actual_irule_name)
     converge_by "Destroy IRule #{actual_irule_name}" do
