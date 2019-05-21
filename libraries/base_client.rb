@@ -4,7 +4,7 @@ module ChefF5
       @node = node
       @resource = resource
       @load_balancer = load_balancer
-      @partition = partition[%r{/?([^/]+)/?},1]
+      @partition = partition[%r{/?([^/]+)/?}, 1]
 
       # local module aliases reduce repetetive call chains
       # rubocop:disable Naming/VariableName
