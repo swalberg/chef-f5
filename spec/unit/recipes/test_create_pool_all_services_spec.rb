@@ -8,14 +8,14 @@ describe 'f5_test::test_create_pool_all_services' do
   let(:api) { double('F5::Icontrol') }
   let(:pool) { double('F5::Icontrol::LocalLB::Pool') }
 
-  let(:chef_run) {
+  let(:chef_run) do
     ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
-  }
+  end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
     allow(api).to receive_message_chain('LocalLB.Pool') { pool }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow_any_instance_of(Chef::RunContext::CookbookCompiler).to receive(:compile_libraries).and_return(true)
     stub_data_bag_item('f5', 'default').and_return(host: '1.2.3.4', username: 'api', password: 'testing')
   end

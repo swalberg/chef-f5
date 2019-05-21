@@ -18,14 +18,14 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_none' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -37,7 +37,7 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_none' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     # these vips have no profiles
     allow(server_api).to receive(:get_profile) {
       { item: { item: [] } }
@@ -62,7 +62,6 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_none' do
       allow(server_api).to receive(:set_default_pool_name)
     end
 
-
     context 'and the staged firewall policy is set to empty' do
       before do
         allow(fw_policy_api).to receive(:get_list) {
@@ -75,14 +74,14 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_none' do
       end
 
       it 'unsets the staged firewall policy' do
-        expect(server_api).to receive(:get_staged_firewall_policy).with({
+        expect(server_api).to receive(:get_staged_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-         })
-         expect(server_api).to receive(:set_staged_firewall_policy).with({
+        )
+        expect(server_api).to receive(:set_staged_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] },
           policies: { item: [ '' ] }
-         })
-         chef_run
+        )
+        chef_run
       end
     end
   end
@@ -114,16 +113,15 @@ describe 'f5_test::test_create_vip_staged_firewall_policy_none' do
       end
 
       it 'unsets the staged firewall policy' do
-        expect(server_api).to receive(:get_staged_firewall_policy).with({
+        expect(server_api).to receive(:get_staged_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-        })
-        expect(server_api).to receive(:set_staged_firewall_policy).with({
+        )
+        expect(server_api).to receive(:set_staged_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] },
           policies: { item: [ '' ] }
-        })
+        )
         chef_run
       end
     end
   end
-
 end

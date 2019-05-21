@@ -2,7 +2,7 @@ require_relative './base_client'
 module ChefF5
   class Client < BaseClient
     unless defined? LB_METHOD_TYPES
-      LB_METHOD_TYPES = %w[
+      LB_METHOD_TYPES = %w(
         LB_METHOD_ROUND_ROBIN
         LB_METHOD_RATIO_MEMBER
         LB_METHOD_LEAST_CONNECTION_MEMBER
@@ -24,7 +24,7 @@ module ChefF5
         LB_METHOD_RATIO_SESSION
         LB_METHOD_RATIO_LEAST_CONNECTION_MEMBER
         LB_METHOD_RATIO_LEAST_CONNECTION_NODE_ADDRESS
-      ].freeze
+      ).freeze
     end
 
     def node_is_missing?(name)
@@ -32,7 +32,7 @@ module ChefF5
 
       return true if response[:item].nil?
 
-      Array(response[:item]).grep(/#{with_partition name}/).empty?
+      Array(response[:item]).grep(/#{with_partition name}$/).empty?
     end
 
     def node_is_enabled?(name)
@@ -65,7 +65,7 @@ module ChefF5
 
       pools = response[:item]
 
-      Array(pools).grep(/#{with_partition name}/).empty?
+      Array(pools).grep(/#{with_partition name}$/).empty?
     end
 
     def pool_is_missing_node?(pool, node)
@@ -76,7 +76,7 @@ module ChefF5
 
       members = [members] if members.is_a? Hash
 
-      members.map { |m| m[:address] }.grep(/#{with_partition node}/).empty?
+      members.map { |m| m[:address] }.grep(/#{with_partition node}$/).empty?
     end
 
     def pool_is_missing_monitor?(pool, monitor)
@@ -96,15 +96,15 @@ module ChefF5
                                                    { pool_name: pool,
                                                      monitor_rule: {
                                                        monitor_templates: {
-                                                         item: monitor
+                                                         item: monitor,
                                                        },
                                                        quorum: '0',
                                                        # this value is overridden if an array of monitors
                                                        # are passed in. Instead it is set to
                                                        # `MONITOR_RULE_TYPE_AND_LIST`
-                                                       type: 'MONITOR_RULE_TYPE_SINGLE'
-                                                     } }
-                                                 ]
+                                                       type: 'MONITOR_RULE_TYPE_SINGLE',
+                                                     } },
+                                                 ],
                                                })
     end
 

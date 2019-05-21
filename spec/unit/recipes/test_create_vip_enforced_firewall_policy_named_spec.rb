@@ -18,14 +18,14 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -37,7 +37,7 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     # these vips have no profiles
     allow(server_api).to receive(:get_profile) {
       { item: { item: [] } }
@@ -75,13 +75,13 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
       end
 
       it 'adds the enforced firewall policy to the vip' do
-        expect(server_api).to receive(:get_enforced_firewall_policy).with({
+        expect(server_api).to receive(:get_enforced_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-         })
-        expect(server_api).to receive(:set_enforced_firewall_policy).with({
-            virtual_servers: { item: ['/Common/myvip'] },
-            policies: { item: [ '/Common/myfwpolicy-enforced' ] }
-           })
+        )
+        expect(server_api).to receive(:set_enforced_firewall_policy).with(
+          virtual_servers: { item: ['/Common/myvip'] },
+          policies: { item: [ '/Common/myfwpolicy-enforced' ] }
+        )
         chef_run
       end
     end
@@ -97,15 +97,14 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
       end
 
       it 'fails to converge' do
-        expect(server_api).to receive(:get_enforced_firewall_policy).with({
+        expect(server_api).to receive(:get_enforced_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-         })
-         expect {
+        )
+        expect do
           chef_run
-        }.to raise_error /Firewall policy myfwpolicy-enforced does not exist/
+        end.to raise_error /Firewall policy myfwpolicy-enforced does not exist/
       end
     end
-
   end
 
   context 'when managing an existing vip' do
@@ -135,13 +134,13 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
       end
 
       it 'adds the enforced firewall policy to the vip' do
-        expect(server_api).to receive(:get_enforced_firewall_policy).with({
+        expect(server_api).to receive(:get_enforced_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-         })
-        expect(server_api).to receive(:set_enforced_firewall_policy).with({
-            virtual_servers: { item: ['/Common/myvip'] },
-            policies: { item: [ '/Common/myfwpolicy-enforced' ] }
-           })
+        )
+        expect(server_api).to receive(:set_enforced_firewall_policy).with(
+          virtual_servers: { item: ['/Common/myvip'] },
+          policies: { item: [ '/Common/myfwpolicy-enforced' ] }
+        )
         chef_run
       end
     end
@@ -157,14 +156,13 @@ describe 'f5_test::test_create_vip_enforced_firewall_policy_named' do
       end
 
       it 'fails to converge' do
-        expect(server_api).to receive(:get_enforced_firewall_policy).with({
+        expect(server_api).to receive(:get_enforced_firewall_policy).with(
           virtual_servers: { item: ['/Common/myvip'] }
-         })
-         expect {
+        )
+        expect do
           chef_run
-        }.to raise_error /Firewall policy myfwpolicy-enforced does not exist/
+        end.to raise_error /Firewall policy myfwpolicy-enforced does not exist/
       end
     end
   end
-
 end

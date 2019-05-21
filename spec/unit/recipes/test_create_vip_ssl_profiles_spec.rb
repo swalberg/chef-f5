@@ -7,12 +7,12 @@ require_relative '../../../libraries/gem_helper'
 describe 'f5_test::test_create_vip_ssl_profiles' do
   let(:api) { double('F5::Icontrol') }
   let(:server_api) { double('F5::Icontrol::LocalLB::VirtualServer') }
-  let(:profile_type) {
+  let(:profile_type) do
     F5::Icontrol::LocalLB::ProfileType
-  }
-  let(:profile_context_type) {
+  end
+  let(:profile_context_type) do
     F5::Icontrol::LocalLB::ProfileContextType
-  }
+  end
 
   let(:chef_run) do
     ChefSpec::SoloRunner.new(
@@ -23,14 +23,14 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       node.normal[:f5][:credentials][:default] = {
         host: '1.2.3.4',
         username: 'api',
-        password: 'testing'
+        password: 'testing',
       }
     end.converge(described_recipe)
   end
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }
-
+    allow(api).to receive_message_chain('System.Session.set_active_folder')
     allow(api)
       .to receive_message_chain('LocalLB.VirtualServer') { server_api }
 
@@ -39,7 +39,7 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
 
     stub_data_bag_item('f5', 'default')
       .and_return(host: '1.2.3.4', username: 'api', password: 'testing')
-    allow(server_api).to receive(:get_rule).and_return({item: {}})
+    allow(server_api).to receive(:get_rule).and_return(item: {})
     allow(server_api).to receive(:get_destination_v2) {
       { item: { address: '86.75.30.9', port: '80' } }
     }
@@ -71,13 +71,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'adds the client ssl profile' do
-        expect(server_api).to receive(:add_profile).with({
-            virtual_servers: { item: ['/Common/myvip'] },
-            profiles: { item: [ { item: [ {
-                profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-                profile_name: '/Common/client.cert'
-              }]}]
-           }})
+        expect(server_api).to receive(:add_profile).with(
+          virtual_servers: { item: ['/Common/myvip'] },
+          profiles: { item: [ { item: [ {
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: '/Common/client.cert',
+          }] }],
+           })
         chef_run
       end
     end
@@ -86,11 +86,11 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: { item: [{
-              profile_type: profile_type::PROFILE_TYPE_CLIENT_SSL.member,
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-              profile_name: '/Common/client.cert'
-            }]
-          }}
+            profile_type: profile_type::PROFILE_TYPE_CLIENT_SSL.member,
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: '/Common/client.cert',
+          }],
+          } }
         }
 
         # must allow the server profile to be set
@@ -98,13 +98,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'does not add the client ssl profile' do
-        expect(server_api).to_not receive(:add_profile).with({
-            virtual_servers: anything,
-            profiles: { item: [ { item: [ {
-                profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-                profile_name: anything
-            }]}]
-          }})
+        expect(server_api).to_not receive(:add_profile).with(
+          virtual_servers: anything,
+          profiles: { item: [ { item: [ {
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: anything,
+          }] }],
+          })
         chef_run
       end
     end
@@ -120,13 +120,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'adds the server ssl profile' do
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: { item: ['/Common/myvip'] },
           profiles: { item: [ { item: [ {
             profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-            profile_name: '/Common/server.cert'
-          }]}]
-        }})
+            profile_name: '/Common/server.cert',
+          }] }],
+        })
         chef_run
       end
     end
@@ -135,23 +135,23 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: { item: [{
-              profile_type: profile_type::PROFILE_TYPE_SERVER_SSL.member,
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: '/Common/server.cert'
-            }]
-          }}
+            profile_type: profile_type::PROFILE_TYPE_SERVER_SSL.member,
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: '/Common/server.cert',
+          }],
+          } }
         }
       end
 
       it 'does not add the server ssl profile' do
-        expect(server_api).to_not receive(:add_profile).with({
+        expect(server_api).to_not receive(:add_profile).with(
           virtual_servers: anything,
           profiles: { item: [ { item: [ {
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: anything
-            }]
-          }]
-        }})
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: anything,
+          }],
+          }],
+        })
         chef_run
       end
     end
@@ -181,13 +181,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'adds the client ssl profile' do
-        expect(server_api).to receive(:add_profile).with({
-            virtual_servers: { item: ['/Common/myvip'] },
-            profiles: { item: [ { item: [ {
-                profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-                profile_name: '/Common/client.cert'
-              }]}]
-           }})
+        expect(server_api).to receive(:add_profile).with(
+          virtual_servers: { item: ['/Common/myvip'] },
+          profiles: { item: [ { item: [ {
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: '/Common/client.cert',
+          }] }],
+           })
         chef_run
       end
     end
@@ -196,11 +196,11 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: { item: [{
-              profile_type: profile_type::PROFILE_TYPE_CLIENT_SSL.member,
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-              profile_name: '/Common/client.cert'
-            }]
-          }}
+            profile_type: profile_type::PROFILE_TYPE_CLIENT_SSL.member,
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: '/Common/client.cert',
+          }],
+          } }
         }
 
         # must allow the server profile to be set
@@ -208,13 +208,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'does not add the client ssl profile' do
-        expect(server_api).to_not receive(:add_profile).with({
-            virtual_servers: anything,
-            profiles: { item: [ { item: [ {
-                profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-                profile_name: anything
-            }]}]
-          }})
+        expect(server_api).to_not receive(:add_profile).with(
+          virtual_servers: anything,
+          profiles: { item: [ { item: [ {
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
+            profile_name: anything,
+          }] }],
+          })
         chef_run
       end
     end
@@ -230,13 +230,13 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       end
 
       it 'adds the server ssl profile' do
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: { item: ['/Common/myvip'] },
           profiles: { item: [ { item: [ {
             profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-            profile_name: '/Common/server.cert'
-          }]}]
-        }})
+            profile_name: '/Common/server.cert',
+          }] }],
+        })
         chef_run
       end
     end
@@ -245,23 +245,23 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       before do
         allow(server_api).to receive(:get_profile) {
           { item: { item: [{
-              profile_type: profile_type::PROFILE_TYPE_SERVER_SSL.member,
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: '/Common/server.cert'
-            }]
-          }}
+            profile_type: profile_type::PROFILE_TYPE_SERVER_SSL.member,
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: '/Common/server.cert',
+          }],
+          } }
         }
       end
 
       it 'does not add the server ssl profile' do
-        expect(server_api).to_not receive(:add_profile).with({
+        expect(server_api).to_not receive(:add_profile).with(
           virtual_servers: anything,
           profiles: { item: [ { item: [ {
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: anything
-            }]
-          }]
-        }})
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: anything,
+          }],
+          }],
+        })
         chef_run
       end
     end
@@ -276,27 +276,27 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       it 'adds a client profile' do
         allow(server_api).to receive(:add_profile)
 
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: { item: ['/Common/myvip'] },
           profiles: { item: [ { item: [ {
             profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-            profile_name: '/Common/client.cert'
-            }]}]
-          }})
+            profile_name: '/Common/client.cert',
+          }] }],
+          })
         chef_run
       end
 
       it 'adds a server profile' do
         allow(server_api).to receive(:add_profile)
 
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: anything,
           profiles: { item: [ { item: [ {
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: anything
-            }]
-          }]
-        }})
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: anything,
+          }],
+          }],
+        })
         chef_run
       end
     end
@@ -306,8 +306,8 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
         allow(server_api).to receive(:get_profile) {
           { item:
             { item:
-              {:profile_type=>"PROFILE_TYPE_TCP", :profile_context=>"PROFILE_CONTEXT_TYPE_ALL", :profile_name=>"/Common/tcp"}
-            }
+              { profile_type: 'PROFILE_TYPE_TCP', profile_context: 'PROFILE_CONTEXT_TYPE_ALL', profile_name: '/Common/tcp' },
+            },
           }
         }
       end
@@ -315,27 +315,27 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
       it 'adds a client profile' do
         allow(server_api).to receive(:add_profile)
 
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: { item: ['/Common/myvip'] },
           profiles: { item: [ { item: [ {
             profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_CLIENT.member,
-            profile_name: '/Common/client.cert'
-            }]}]
-          }})
+            profile_name: '/Common/client.cert',
+          }] }],
+          })
         chef_run
       end
 
       it 'adds a server profile' do
         allow(server_api).to receive(:add_profile)
 
-        expect(server_api).to receive(:add_profile).with({
+        expect(server_api).to receive(:add_profile).with(
           virtual_servers: anything,
           profiles: { item: [ { item: [ {
-              profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
-              profile_name: anything
-            }]
-          }]
-        }})
+            profile_context: profile_context_type::PROFILE_CONTEXT_TYPE_SERVER.member,
+            profile_name: anything,
+          }],
+          }],
+        })
         chef_run
       end
     end

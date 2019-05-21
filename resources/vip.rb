@@ -7,6 +7,7 @@ property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
 property :lb_username, String
 property :lb_password, String
+property :partition, String, default: 'Common'
 property :client_ssl_profile, String
 property :server_ssl_profile, String
 property :snat_pool, [:manual, :none, :automap, String], default: :manual
@@ -15,10 +16,10 @@ property :staged_firewall_policy, [:manual, :none, String], default: :manual
 property :irules, Array, default: []
 property :http_profile, [NilClass, String, Symbol], default: nil
 
-IPv4 = %r{^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$}
+IPV4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/
 
 def resolve_ip(name)
-  if name =~ IPv4
+  if name =~ IPV4
     name
   else
     DNSLookup.new(name).address
@@ -28,7 +29,7 @@ end
 action :create do
   load_f5_gem
   actual_vip_name = new_resource.vip_name || new_resource.name
-  vip = ChefF5::VIP.new(node, new_resource, new_resource.load_balancer)
+  vip = ChefF5::VIP.new(node, new_resource, new_resource.load_balancer, new_resource.partition)
   ip = resolve_ip(new_resource.address)
 
   next if ip.nil?
@@ -115,20 +116,20 @@ action :create do
 
     unless current_snat_pool == new_resource.snat_pool
 
-      converge_by("Change server source address translation from"\
+      converge_by('Change server source address translation from'\
                   " '#{current_snat_pool}' to"\
                   " '#{new_resource.snat_pool}'") do
 
         vip.set_snat_pool(actual_vip_name, new_resource.snat_pool)
 
-        Chef::Log.info("Changed server source address translation from"\
+        Chef::Log.info('Changed server source address translation from'\
                     " '#{current_snat_pool}' to"\
                     " '#{new_resource.snat_pool}'")
       end
     end
   end
   added, changed, removed, target = vip.irules_changed?(actual_vip_name, new_resource.irules)
-  unless [added, changed, removed].all? { |l| l.empty? }
+  unless [added, changed, removed].all?(&:empty?)
     msg = "Update IRules for #{actual_vip_name}; "\
       "The following rules changed: #{changed.join ', '}."\
       "The following rules have been added: #{added.to_a.join ', '}"\

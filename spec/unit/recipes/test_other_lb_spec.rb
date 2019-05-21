@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'f5/icontrol'
 require_relative '../../../libraries/chef_f5'
 require_relative '../../../libraries/credentials'
+require_relative '../../../libraries/gem_helper'
 
 describe 'f5_test::test_other_lb' do
   let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) }
@@ -14,7 +15,7 @@ describe 'f5_test::test_other_lb' do
 
   it 'calls the second load balancer' do
     expect(F5::Icontrol::API).to receive(:new).with(nil, host: '4.4.4.4', username: 'test2', password: 'testing').and_call_original
-    expect(F5::Icontrol::API).to receive(:new).with('LocalLB', host: '4.4.4.4', username: 'test2', password: 'testing').and_raise(ArgumentError)
+    expect(F5::Icontrol::API).to receive(:new).with('System', host: '4.4.4.4', username: 'test2', password: 'testing').and_raise(ArgumentError)
     expect { chef_run }.to raise_error(ArgumentError)
   end
 end
