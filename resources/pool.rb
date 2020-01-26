@@ -1,4 +1,4 @@
-property :pool_name, [NilClass, String], default: nil
+property :pool_name, String, name_property: true
 property :host, String, regex: /.*/
 property :ip, String, regex: /.*/
 property :port, [String, Integer], regex: /^(\*|\d+)$/
@@ -13,16 +13,15 @@ property :partition, String, default: 'Common'
 property :enabled_status, [:manual, :enabled, :disabled], default: node['f5']['enabled_status']
 
 create_node = proc do
-  actual_pool_name = new_resource.pool_name || new_resource.name
   if @f5.node_is_missing?(new_resource.host)
     converge_by("Add node #{new_resource.host}") do
       @f5.add_node(new_resource.host, new_resource.ip)
     end
   end
 
-  if @f5.pool_is_missing_node?(actual_pool_name, new_resource.host)
-    converge_by("Add #{new_resource.host} to pool #{actual_pool_name}") do
-      @f5.add_node_to_pool(actual_pool_name, new_resource.host, new_resource.port)
+  if @f5.pool_is_missing_node?(new_resource.pool_name, new_resource.host)
+    converge_by("Add #{new_resource.host} to pool #{new_resource.pool_name}") do
+      @f5.add_node_to_pool(new_resource.pool_name, new_resource.host, new_resource.port)
     end
   end
   if new_resource.enabled_status != :manual
@@ -39,50 +38,49 @@ create_node = proc do
   end
 
   if new_resource.ratio
-    if @f5.pool_ratio_changed?(actual_pool_name, new_resource.ratio, new_resource.host, new_resource.port)
-      converge_by("Updating ratio on pool #{actual_pool_name}") do
-        @f5.pool_update_ratio(actual_pool_name, new_resource.ratio, new_resource.host, new_resource.port)
+    if @f5.pool_ratio_changed?(new_resource.pool_name, new_resource.ratio, new_resource.host, new_resource.port)
+      converge_by("Updating ratio on pool #{new_resource.pool_name}") do
+        @f5.pool_update_ratio(new_resource.pool_name, new_resource.ratio, new_resource.host, new_resource.port)
       end
     else
-      Chef::Log.debug("#{actual_pool_name} has the correct ratio.")
+      Chef::Log.debug("#{new_resource.pool_name} has the correct ratio.")
     end
   end
 end
 
 create_pool = proc do
-  actual_pool_name = new_resource.pool_name || new_resource.name
-  if @f5.pool_is_missing?(actual_pool_name)
-    converge_by("Create pool #{actual_pool_name}") do
+  if @f5.pool_is_missing?(new_resource.pool_name)
+    converge_by("Create pool #{new_resource.pool_name}") do
       if new_resource.lb_method
-        @f5.create_pool(actual_pool_name, new_resource.lb_method)
+        @f5.create_pool(new_resource.pool_name, new_resource.lb_method)
       else
-        @f5.create_pool(actual_pool_name)
+        @f5.create_pool(new_resource.pool_name)
       end
     end
   end
 
   if new_resource.monitor
-    if @f5.pool_is_missing_monitor?(actual_pool_name, new_resource.monitor)
-      converge_by("Add monitor #{new_resource.monitor} to pool #{actual_pool_name}") do
+    if @f5.pool_is_missing_monitor?(new_resource.pool_name, new_resource.monitor)
+      converge_by("Add monitor #{new_resource.monitor} to pool #{new_resource.pool_name}") do
         begin
-          @f5.add_monitor(actual_pool_name, new_resource.monitor)
+          @f5.add_monitor(new_resource.pool_name, new_resource.monitor)
         rescue StandardError => e
           Chef::Log.info("Adding monitor #{new_resource.monitor} failed. Ensure it exists.")
           Chef::Log.info(e.inspect)
         end
       end
     else
-      Chef::Log.debug("#{actual_pool_name} already has monitor #{new_resource.monitor}")
+      Chef::Log.debug("#{new_resource.pool_name} already has monitor #{new_resource.monitor}")
     end
   end
 
   if new_resource.lb_method
-    if @f5.pool_lb_method_changed?(actual_pool_name, new_resource.lb_method)
-      converge_by("Updating lb_method on pool #{actual_pool_name}") do
-        @f5.pool_update_lb_method(actual_pool_name, new_resource.lb_method)
+    if @f5.pool_lb_method_changed?(new_resource.pool_name, new_resource.lb_method)
+      converge_by("Updating lb_method on pool #{new_resource.pool_name}") do
+        @f5.pool_update_lb_method(new_resource.pool_name, new_resource.lb_method)
       end
     else
-      Chef::Log.debug("#{actual_pool_name} has the correct lb_method.")
+      Chef::Log.debug("#{new_resource.pool_name} has the correct lb_method.")
     end
   end
 end
