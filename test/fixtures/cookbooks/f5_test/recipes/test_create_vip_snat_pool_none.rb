@@ -3,6 +3,5 @@ f5_vip 'myvip' do
   port '80'
   protocol 'PROTOCOL_TCP'
   pool 'reallybasic'
-
   snat_pool :none
 end

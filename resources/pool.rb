@@ -10,7 +10,7 @@ property :lb_host, String
 property :lb_username, String
 property :lb_password, String
 property :partition, String, default: 'Common'
-property :enabled_status, [:manual, :enabled, :disabled], default: node['f5']['enabled_status']
+property :enabled_status, [:manual, :enabled, :disabled], default: lazy { node['f5']['enabled_status'] }
 
 create_node = proc do
   if @f5.node_is_missing?(new_resource.host)
