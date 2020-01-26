@@ -5,7 +5,7 @@ require_relative '../../../libraries/credentials'
 require_relative '../../../libraries/gem_helper'
 
 describe 'f5_test::test_other_lb' do
-  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) }
+  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04', step_into: ['f5_pool']).converge(described_recipe) }
 
   before do
     allow_any_instance_of(Chef::RunContext::CookbookCompiler).to receive(:compile_libraries).and_return(true)

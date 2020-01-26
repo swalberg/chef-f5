@@ -8,7 +8,7 @@ describe 'f5_test::test_create_pool' do
   let(:api) { double('F5::Icontrol') }
 
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04', step_into: ['f5_pool']).converge(described_recipe)
   end
 
   before do
