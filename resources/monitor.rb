@@ -5,8 +5,8 @@ property :interval, Integer
 property :timeout, Integer
 property :dest_ip, String, default: '0.0.0.0'
 property :dest_port, String, default: '0'
-property :read_only, [TrueClass, FalseClass], default: false
-property :directly_usable, [TrueClass, FalseClass], default: true
+property :read_only, [true, false], default: false
+property :directly_usable, [true, false], default: true
 property :string_properties, Hash, default: {}
 property :load_balancer, String, regex: /.*/, default: 'default'
 property :lb_host, String
