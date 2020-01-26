@@ -12,4 +12,4 @@ end
 
 issues_url 'https://github.com/swalberg/chef-f5/issues'
 source_url 'https://github.com/swalberg/chef-f5/'
-chef_version '>= 12.7' if respond_to?(:chef_version)
+chef_version '>= 12.7'
