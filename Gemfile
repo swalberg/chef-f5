@@ -10,8 +10,7 @@ end
 gem 'test-kitchen'
 gem 'kitchen-vagrant'
 gem 'chefspec'
-gem 'foodcritic'
-gem 'rubocop'
+gem 'cookstyle'
 gem 'listen', '2.10.1' # fixed for guard
 gem 'rb-readline'
 gem 'guard'

@@ -3,9 +3,9 @@ task :guard do
   exec('bundle exec guard')
 end
 
-desc 'lint the cookbook with rubocop'
+desc 'lint the cookbook with cookstyle'
 task :lint do
-  exec('bundle exec rubocop')
+  exec('bundle exec cookstyle')
 end
 
 desc 'run unit tests'
