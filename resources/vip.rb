@@ -16,7 +16,7 @@ property :staged_firewall_policy, [:manual, :none, String], default: :manual
 property :irules, Array, default: []
 property :http_profile, [NilClass, String, Symbol], default: nil
 
-IPV4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/
+IPV4 = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.freeze
 
 def resolve_ip(name)
   if name =~ IPV4
@@ -119,7 +119,6 @@ action :create do
       converge_by('Change server source address translation from'\
                   " '#{current_snat_pool}' to"\
                   " '#{new_resource.snat_pool}'") do
-
         vip.set_snat_pool(actual_vip_name, new_resource.snat_pool)
 
         Chef::Log.info('Changed server source address translation from'\

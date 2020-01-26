@@ -60,7 +60,7 @@ describe 'f5_test::test_create_monitor' do
                                                                  is_read_only: false,
                                                                  is_directly_usable: true
                                                                )] }
-        ))
+                                                             ))
         expect(f5_monitor).to receive(:set_template_string_property)
           .with(hash_including(template_names: { item: ['/Common/test-monitor'] },
                                values: { item: [{ type: 'STYPE_RECEIVE', value: 'status.*UP' }] }))
