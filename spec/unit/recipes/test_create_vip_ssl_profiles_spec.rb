@@ -17,7 +17,7 @@ describe 'f5_test::test_create_vip_ssl_profiles' do
   let(:chef_run) do
     ChefSpec::SoloRunner.new(
       platform: 'centos',
-      version: '7.3.1611',
+      version: '7',
       step_into: ['f5_vip']
     ) do |node|
       node.normal[:f5][:credentials][:default] = {
