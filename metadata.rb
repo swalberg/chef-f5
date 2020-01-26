@@ -5,7 +5,7 @@ license          'MIT'
 description      'Resources for managing an F5 BigIP load balancer'
 version          '0.4.13'
 
-%w(ubuntu debian redhat centos suse opensuse opensuseleap scientific oracle amazon windows).each do |os|
+%w(ubuntu debian redhat centos suse opensuseleap scientific oracle amazon windows).each do |os|
   supports os
 end
 
