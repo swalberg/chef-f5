@@ -4,3 +4,4 @@ rvm:
   - 2.6
 script:
   - bundle exec rake test
+bundler_args: --with travis
