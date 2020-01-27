@@ -6,7 +6,7 @@ require_relative '../../../libraries/gem_helper'
 
 describe 'f5_test::test_other_partition' do
   let(:api) { double('F5::Icontrol') }
-  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe) }
+  let(:chef_run) { ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04', step_into: ['f5_pool']).converge(described_recipe) }
 
   before do
     allow(F5::Icontrol::API).to receive(:new) { api }

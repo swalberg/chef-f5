@@ -83,7 +83,7 @@ module ChefF5
       has_type_of_profile?(vip,
                    @ProfileType::PROFILE_TYPE_HTTP.member,
                    @ProfileContextType::PROFILE_CONTEXT_TYPE_ALL.member
-                          )
+      )
     end
 
     def has_http_profile?(vip, profile_name)

@@ -8,7 +8,7 @@ describe 'f5_test::test_create_monitor' do
   let(:api) { double('F5::Icontrol') }
 
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_monitor']).converge(described_recipe)
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04', step_into: ['f5_monitor']).converge(described_recipe)
   end
 
   let(:f5_monitor) { double 'LocalLB.Monitor' }
@@ -60,7 +60,7 @@ describe 'f5_test::test_create_monitor' do
                                                                  is_read_only: false,
                                                                  is_directly_usable: true
                                                                )] }
-        ))
+                                                             ))
         expect(f5_monitor).to receive(:set_template_string_property)
           .with(hash_including(template_names: { item: ['/Common/test-monitor'] },
                                values: { item: [{ type: 'STYPE_RECEIVE', value: 'status.*UP' }] }))

@@ -9,7 +9,7 @@ describe 'f5_test::test_manage_nodes_disabled' do
   let(:api) { double('F5::Icontrol') }
   let (:node) { double('node') }
   let(:chef_run) do
-    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '14.04', step_into: ['f5_pool']).converge(described_recipe)
+    ChefSpec::SoloRunner.new(platform: 'ubuntu', version: '18.04', step_into: ['f5_pool']).converge(described_recipe)
   end
   let(:enabled_status) { F5::Icontrol::LocalLB::EnabledStatus }
   let(:enabled_state)  { F5::Icontrol::Common::EnabledState }
